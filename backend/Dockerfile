@@ -4,11 +4,11 @@ FROM node:18
 # Establecer el directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Copiar solo los archivos necesarios para instalar dependencias
+# Copiar el archivo package.json y package-lock.json
 COPY package*.json ./
 
-# Instalar las dependencias de producción
-RUN npm install --only=production
+# Instalar las dependencias
+RUN npm install
 
 # Copiar el resto del código de la aplicación
 COPY . .

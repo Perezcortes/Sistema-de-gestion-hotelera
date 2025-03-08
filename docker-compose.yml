@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   frontend:
     build: ./frontend
@@ -8,6 +6,8 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true  # Necesario para hot-reloading en Docker
     depends_on:
       - backend
 
@@ -36,6 +36,7 @@ services:
       - MYSQL_DATABASE=hotel_db
     volumes:
       - mysql-data:/var/lib/mysql
+      - ./db-init/init.sql:/docker-entrypoint-initdb.d/init.sql  # Montar el script SQL
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
