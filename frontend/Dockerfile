@@ -1,26 +1,18 @@
-# Usar la imagen oficial de Node.js 18
+# Usar Node.js 18
 FROM node:18
 
-# Establecer el directorio de trabajo dentro del contenedor
+# Directorio de trabajo
 WORKDIR /app
 
-# Copiar solo los archivos necesarios para instalar dependencias
+# Copiar archivos de dependencias
 COPY package*.json ./
 
-# Instalar las dependencias
+# Instalar todas las dependencias
 RUN npm install
 
-# Copiar el resto del código de la aplicación
+# Copiar el código fuente
 COPY . .
 
-# Construir la aplicación para producción
-RUN npm run build
-
-# Instalar un servidor web ligero para servir la aplicación
-RUN npm install -g serve
-
-# Exponer el puerto en el que corre la aplicación
+# Exponer puerto y ejecutar en modo desarrollo
 EXPOSE 3000
-
-# Comando para ejecutar la aplicación
-CMD ["serve", "-s", "build", "-l", "3000"]
+CMD ["npm", "start"]  
