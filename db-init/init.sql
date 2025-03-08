@@ -1,6 +1,7 @@
--- Crear la base de datos
-CREATE DATABASE IF NOT EXISTS hotel_db;
-USE hotel_db;
+-- Agregar usuario root con host '%' en init.sql:
+CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON hotel_db.* TO 'root'@'%';
+FLUSH PRIVILEGES;
 
 -- Tabla de usuarios
 CREATE TABLE IF NOT EXISTS usuarios (

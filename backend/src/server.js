@@ -1,4 +1,13 @@
-// En server.js (backend)
-app.get("/api/mensaje", (req, res) => {
-    res.json({ mensaje: "Hola desde el backend!" });
-  });
+import app from './app.js'; // Importas la aplicación desde app.js
+import { testConnection } from './config/db.js';
+
+// Configuración inicial
+const PORT = process.env.PORT || 5000;
+
+// Probar conexión a DB al iniciar
+testConnection();
+
+// Iniciar servidor
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+});

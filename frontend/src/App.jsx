@@ -1,17 +1,33 @@
-// App.jsx
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 function App() {
+  const [habitaciones, setHabitaciones] = useState([]);
+
   useEffect(() => {
-    axios.get("/api/mensaje")
-      .then(res => console.log("Respuesta del backend:", res.data))
-      .catch(err => console.error("Error:", err));
+    const fetchHabitaciones = async () => {
+      try {
+        const response = await axios.get('/api/habitaciones');
+        setHabitaciones(response.data);
+      } catch (error) {
+        console.error('Error fetching habitaciones:', error);
+      }
+    };
+    
+    fetchHabitaciones();
   }, []);
 
   return (
-    <div>
-      <h1>Bienvenido al Sistema de Gestión Hotelera eq5</h1>
+    <div className="App">
+      <h1>Listado de Habitaciones</h1>
+      {habitaciones.map(habitacion => (
+        <div key={habitacion.id}>
+          <h3>{habitacion.numero}</h3>
+          <p>Tipo: {habitacion.tipo}</p>
+        </div>
+      ))}
     </div>
   );
 }
+
+export default App;
