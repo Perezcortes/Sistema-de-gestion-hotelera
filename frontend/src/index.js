@@ -1,17 +1,12 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom'; // Importa el Router
-import App from './App.jsx';
+import ReactDOM from 'react-dom';
+import { BrowserRouter } from 'react-router-dom';
+import App from './App';
+import './styles/index.css';
 
-// Configuración base de axios
-import axios from 'axios';
-axios.defaults.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <BrowserRouter> {/* Agrega BrowserRouter aquí */}
-      <App />
-    </BrowserRouter>
-  </React.StrictMode>
+ReactDOM.render(
+  <BrowserRouter>
+    <App />
+  </BrowserRouter>,
+  document.getElementById('root')
 );
