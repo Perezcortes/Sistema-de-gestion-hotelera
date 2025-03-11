@@ -1,8 +1,4 @@
 import mysql from 'mysql2/promise';
-import dotenv from 'dotenv';
-
-// Cargar variables de entorno
-dotenv.config();
 
 // Configuración del pool de conexiones
 const pool = mysql.createPool({
@@ -16,17 +12,18 @@ const pool = mysql.createPool({
 });
 
 // Función para probar la conexión
-export const testConnection = async () => {
+const testConnection = async () => {
   let connection;
   try {
     connection = await pool.getConnection();
-    console.log('✅ Conectado a MySQL correctamente');
+    console.log('Conectado a MySQL correctamente');
   } catch (error) {
-    console.error('❌ Error de conexión a MySQL:', error.message);
+    console.error('Error de conexión a MySQL:', error.message);
     process.exit(1); // Detener la aplicación si falla la conexión
   } finally {
-    if (connection) connection.release(); // Liberar la conexión si existe
+    if (connection) connection.release();
   }
 };
 
+export { testConnection };
 export default pool;

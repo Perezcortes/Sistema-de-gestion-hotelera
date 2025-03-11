@@ -1,5 +1,7 @@
 import app from './app.js'; // Importas la aplicación desde app.js
 import { testConnection } from './config/db.js';
+import 'dotenv/config';
+
 
 // Configuración inicial
 const PORT = process.env.PORT || 5000;
