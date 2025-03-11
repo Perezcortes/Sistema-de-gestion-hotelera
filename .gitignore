@@ -1,10 +1,16 @@
 # Ignorar node_modules
 node_modules/
 
+# Ignorar archivos de configuración locales
+.env
+
 # Ignorar logs y archivos temporales
 *.log
 *.tmp
 
-# Ignorar los bloques de lockfiles si son específicos del entorno
-package-lock.json
-yarn.lock
+# Ignorar archivos de build y distribuciones
+/build/
+dist/
+
+# Ignorar configuraciones específicas de Docker
+docker-compose.override.yml
