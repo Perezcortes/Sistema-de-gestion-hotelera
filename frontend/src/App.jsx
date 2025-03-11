@@ -1,32 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import Habitaciones from './pages/Habitaciones';
 
 function App() {
-  const [habitaciones, setHabitaciones] = useState([]);
-
-  useEffect(() => {
-    const fetchHabitaciones = async () => {
-      try {
-        const response = await axios.get('/api/habitaciones');
-        setHabitaciones(response.data);
-      } catch (error) {
-        console.error('Error fetching habitaciones:', error);
-      }
-    };
-    
-    fetchHabitaciones();
-  }, []);
-
   return (
-    <div className="App">
-      <h1>Listado de Habitaciones</h1>
-      {habitaciones.map(habitacion => (
-        <div key={habitacion.id}>
-          <h3>{habitacion.numero}</h3>
-          <p>Tipo: {habitacion.tipo}</p>
-        </div>
-      ))}
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/habitaciones" element={<Habitaciones />} />
+      </Routes>
+    </Router>
   );
 }
 

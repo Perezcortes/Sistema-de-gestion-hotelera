@@ -1,0 +1,10 @@
+# Ignorar node_modules
+node_modules/
+
+# Ignorar logs y archivos temporales
+*.log
+*.tmp
+
+# Ignorar los bloques de lockfiles si son específicos del entorno
+package-lock.json
+yarn.lock
