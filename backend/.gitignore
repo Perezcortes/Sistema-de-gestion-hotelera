@@ -1,0 +1,30 @@
+# Node modules
+node_modules/
+
+# Archivos de log
+*.log
+
+# Directorios de compilación (si usas dist o build)
+dist/
+build/
+
+# Archivos de entorno con claves o datos sensibles
+.env
+
+# Archivos temporales del editor (ejemplo VSCode)
+.vscode/
+
+# Archivos de sistema operativos (Windows, Mac)
+Thumbs.db
+.DS_Store
+
+# Cache de npm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ts-node-dev cache
+.ts-node-dev/
+
+# Directorio con dependencias instaladas por el paquete
+package-lock.json
