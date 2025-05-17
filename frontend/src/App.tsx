@@ -1,19 +1,31 @@
-import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Navbar from "./components/Navbar";
-import Home from "./pages/HomePage";
-import LoginPage from "./pages/LoginPage";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import Home from './pages/HomePage';
+import LoginPage from './pages/LoginPage';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 
-function App() {
+function AppContent() {
+  const location = useLocation();
+  const hideLayout = location.pathname === '/login'; // Si no quieres Navbar/Footer en login
+
   return (
-    <BrowserRouter>
-      <Navbar />
+    <>
+      {!hideLayout && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<LoginPage />} />
-        {/* Puedes agregar más rutas aquí */}
       </Routes>
-    </BrowserRouter>
+      {!hideLayout && <Footer />}
+    </>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
   );
 }
 

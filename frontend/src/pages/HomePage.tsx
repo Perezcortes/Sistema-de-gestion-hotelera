@@ -1,15 +1,10 @@
 import React from 'react';
 import '../styles/HomePage.css';
 import hero from '../assets/hero.avif';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 
 const Home = () => {
   return (
     <div className="w-full min-h-screen bg-white text-gray-800 font-sans">
-      {/* Navbar */}
-      <Navbar />
-
       {/* Hero */}
       <section className="relative pt-16"> {/* pt-16 para compensar el alto del navbar */}
         <img
@@ -54,9 +49,6 @@ const Home = () => {
           ))}
         </div>
       </section>
-
-      {/* Footer */}
-      <Footer />
     </div>
   );
 };
