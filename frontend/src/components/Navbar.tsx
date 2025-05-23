@@ -61,7 +61,7 @@ const Navbar: React.FC = () => {
               )
             )}
             <Link
-              to="/reservar"
+              to="/reserva"
               className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full shadow-md transition"
             >
               Reservar Ahora
@@ -95,7 +95,7 @@ const Navbar: React.FC = () => {
             )
           )}
           <Link
-            to="/reservar"
+            to="/reserva"
             className="block bg-blue-600 text-white text-center py-3 rounded-full hover:bg-blue-700 transition"
           >
             Reservar Ahora
