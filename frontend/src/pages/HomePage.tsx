@@ -1,12 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../styles/HomePage.css';
 import hero from '../assets/hero.avif';
+import ReservaPage from './ReservaPage'; // importar el componente del formulario
 
 const Home = () => {
+  const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const navigate = useNavigate();
+
   return (
     <div className="w-full min-h-screen bg-white text-gray-800 font-sans">
       {/* Hero */}
-      <section className="relative pt-16"> {/* pt-16 para compensar el alto del navbar */}
+      <section className="relative pt-16">
         <img
           src={hero}
           alt="Hotel"
@@ -15,11 +20,21 @@ const Home = () => {
         <div className="absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center text-white px-4 text-center">
           <h1 className="text-4xl md:text-6xl font-bold drop-shadow-lg">Bienvenido a Hotel Paraíso</h1>
           <p className="mt-4 text-lg md:text-2xl drop-shadow">Donde el lujo y la comodidad se encuentran</p>
-          <button className="mt-6 px-6 py-3 bg-blue-500 hover:bg-blue-600 rounded-md text-white font-semibold shadow">
+          <button
+            onClick={() => navigate('/reserva')} // 👈 Redirige a la ruta
+            className="mt-6 px-6 py-3 bg-blue-500 hover:bg-blue-600 rounded-md text-white font-semibold shadow"
+          >
             Reservar ahora
           </button>
         </div>
       </section>
+
+      {/* Mostrar el formulario si el usuario hizo clic */}
+      {mostrarFormulario && (
+        <div className="px-6 py-10">
+          <ReservaPage />
+        </div>
+      )}
 
       {/* Sección de servicios */}
       <section className="py-16 px-6 md:px-20 bg-gray-100">
