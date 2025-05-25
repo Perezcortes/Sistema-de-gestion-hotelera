@@ -1,10 +1,12 @@
 import express from "express";
-import { registerUser } from "../controllers/auth.controller";
+import { registerUser, loginUser, getUserProfile } from "../controllers/auth.controller";
+import { authenticateToken } from "../middlewares/auth";
+import { asyncHandler } from "../utils/asyncHandler";
 
 const router = express.Router();
 
-router.post("/register", (req, res, next) => {
-  registerUser(req, res).catch(next);
-});
+router.post("/register", asyncHandler(registerUser));
+router.post("/login", asyncHandler(loginUser));
+router.get("/profile", authenticateToken, asyncHandler(getUserProfile));
 
 export default router;
