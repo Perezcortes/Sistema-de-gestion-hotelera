@@ -27,12 +27,16 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
+  // Modificación: Asignar id_rol = 1 por defecto
   const [result]: any = await pool.query(
-    "INSERT INTO usuarios (nombre, username, email, password) VALUES (?, ?, ?, ?)",
-    [nombre, username, email, hashedPassword]
+    "INSERT INTO usuarios (nombre, username, email, password, id_rol) VALUES (?, ?, ?, ?, ?)",
+    [nombre, username, email, hashedPassword, 1] // <- Añade el valor 1 para id_rol
   );
 
-  res.status(201).json({ message: "Usuario registrado correctamente", id_usuario: result.insertId });
+  res.status(201).json({ 
+    message: "Usuario registrado correctamente", 
+    id_usuario: result.insertId 
+  });
 };
 
 // Login de usuario
