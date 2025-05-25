@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import jsPDF from 'jspdf';
@@ -48,10 +50,13 @@ const METODOS_PAGO: MetodoPago[] = ['tarjeta', 'paypal', 'transferencia'];
 
 // --- COMPONENTE PRINCIPAL ---
 const ReservaPage: React.FC = () => {
+  const { isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
+  
   // --- ESTADOS ---
   const [form, setForm] = useState<FormData>({
-    nombre: '',
-    email: '',
+    nombre: user?.username || '',
+    email: user?.email || '',
     telefono: '',
     destino: '',
     fechaLlegada: '',
@@ -65,6 +70,27 @@ const ReservaPage: React.FC = () => {
   });
 
   const [showModal, setShowModal] = useState(false);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Verificar autenticación al cargar
+  useEffect(() => {
+    if (!isAuthenticated) {
+      toast.info('Debes iniciar sesión para hacer una reserva', {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      navigate('/login', { state: { from: '/reserva' } });
+    } else {
+      // Mostrar modal de bienvenida si es la primera vez que reserva
+      const hasReservedBefore = localStorage.getItem('hasReservedBefore');
+      if (!hasReservedBefore) {
+        setShowWelcomeModal(true);
+        localStorage.setItem('hasReservedBefore', 'true');
+      }
+      setIsLoading(false);
+    }
+  }, [isAuthenticated, navigate]);
 
   // --- FUNCIONES DE AYUDA ---
   const calcularNoches = (): number => {
@@ -85,8 +111,6 @@ const ReservaPage: React.FC = () => {
 
     // Precio base según tipo de habitación
     let precioBase = PRECIOS_HABITACION[form.tipoHabitacion];
-
-    // Ajustes de precio según destino
     if (form.destino === 'Chiapas') precioBase *= 1.2; // 20% más caro en chiapas
     if (form.destino === 'Monterrey') precioBase *= 1.1; // 10% más caro en Monterrey
 
@@ -94,29 +118,18 @@ const ReservaPage: React.FC = () => {
   };
 
   const validarFormulario = (): boolean => {
-    const {
-      nombre,
-      email,
-      telefono,
-      destino,
-      fechaLlegada,
-      fechaSalida,
-      tipoHabitacion,
-      metodoPago
-    } = form;
-
-    if (!nombre || !email || !telefono || !destino) return false;
-    if (!fechaLlegada || !fechaSalida) return false;
-    if (new Date(fechaSalida) <= new Date(fechaLlegada)) return false;
-    if (!tipoHabitacion || !metodoPago) return false;
-
-    return true;
+    const { nombre, email, telefono, destino, fechaLlegada, fechaSalida, tipoHabitacion, metodoPago } = form;
+    return !!(
+      nombre && email && telefono && destino && 
+      fechaLlegada && fechaSalida && 
+      new Date(fechaSalida) > new Date(fechaLlegada) && 
+      tipoHabitacion && metodoPago
+    );
   };
 
   const limpiarFormulario = () => {
-    setForm({
-      nombre: '',
-      email: '',
+    setForm(prev => ({
+      ...prev,
       telefono: '',
       destino: '',
       fechaLlegada: '',
@@ -127,7 +140,7 @@ const ReservaPage: React.FC = () => {
       serviciosExtra: [],
       metodoPago: '',
       comentarios: '',
-    });
+    }));
   };
 
   // --- MANEJADORES DE EVENTOS ---
@@ -138,14 +151,14 @@ const ReservaPage: React.FC = () => {
     const checked = type === 'checkbox' ? (e.target as HTMLInputElement).checked : undefined;
 
     if (type === 'checkbox' && name === 'serviciosExtra') {
-      setForm((prev) => ({
+      setForm(prev => ({
         ...prev,
         serviciosExtra: checked
           ? [...prev.serviciosExtra, value]
-          : prev.serviciosExtra.filter((serv) => serv !== value),
+          : prev.serviciosExtra.filter(serv => serv !== value),
       }));
     } else {
-      setForm((prev) => ({
+      setForm(prev => ({
         ...prev,
         [name]: type === 'number' ? parseInt(value) || 0 : value,
       }));
@@ -154,19 +167,14 @@ const ReservaPage: React.FC = () => {
 
   const generarPDF = () => {
     const doc = new jsPDF();
-
-    // Configuración inicial
     doc.setFontSize(18);
     doc.setTextColor(0, 0, 128);
     doc.text('Confirmación de Reserva', 105, 20, { align: 'center' });
 
-    // Información de la reserva
     doc.setFontSize(12);
     doc.setTextColor(0, 0, 0);
 
     let yPosition = 40;
-    const incrementoLinea = 10;
-
     const datosReserva = [
       { label: 'Nombre', value: form.nombre },
       { label: 'Email', value: form.email },
@@ -187,14 +195,12 @@ const ReservaPage: React.FC = () => {
       { label: 'Noches', value: calcularNoches().toString() },
     ];
 
-    // Agregar datos al PDF
     datosReserva.forEach((item) => {
       doc.text(`${item.label}:`, 20, yPosition);
       doc.text(item.value, 70, yPosition);
-      yPosition += incrementoLinea;
+      yPosition += 10;
     });
 
-    // Precio total
     yPosition += 5;
     doc.setFontSize(14);
     doc.setTextColor(0, 100, 0);
@@ -205,7 +211,6 @@ const ReservaPage: React.FC = () => {
       { align: 'center' }
     );
 
-    // Guardar PDF
     doc.save(`reserva-${form.nombre}-${form.destino}.pdf`);
   };
 
@@ -220,44 +225,82 @@ const ReservaPage: React.FC = () => {
     }
 
     try {
-      // Simulación de envío a la API
+      setIsLoading(true);
       const response = await fetch('http://localhost:3000/api/reservas', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}` // Asumiendo que usas tokens
         },
         body: JSON.stringify(form),
       });
 
-      if (!response.ok) {
-        throw new Error('Error al enviar la reserva');
-      }
+      if (!response.ok) throw new Error('Error al enviar la reserva');
 
       toast.success('¡Reserva enviada con éxito!', {
         position: "top-right",
         autoClose: 1000,
       });
 
-      setTimeout(() => {
-        setShowModal(true);
-      }, 1000);
-
+      setTimeout(() => setShowModal(true), 1000);
     } catch (error) {
       console.error(error);
       toast.error('Hubo un problema al enviar la reserva. Intente nuevamente.', {
         position: "top-right",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // --- RENDERIZADO ---
+  if (!isAuthenticated || isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Verificando autenticación...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6 bg-white rounded-lg shadow-lg my-6 sm:my-10 font-sans relative">
       <ToastContainer />
+      
+      {/* Modal de Bienvenida */}
+      {showWelcomeModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl relative">
+            <button 
+              onClick={() => setShowWelcomeModal(false)}
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
+            <h2 className="text-2xl font-bold text-center text-blue-600 mb-4">
+              ¡Bienvenido, {user?.username}!
+            </h2>
+            <p className="text-center mb-6">
+              Ahora puedes realizar tu reserva en nuestro hotel. 
+              Disfruta de nuestros servicios exclusivos y de la mejor atención.
+            </p>
+            <div className="flex justify-center">
+              <button
+                onClick={() => setShowWelcomeModal(false)}
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
+              >
+                Comenzar reserva
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center text-blue-700">Reserva tu experiencia</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Sección 1: Datos personales */}
+         {/* Sección 1: Datos personales */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label htmlFor="nombre" className="block font-medium mb-1 text-sm sm:text-base">Nombre completo *</label>
@@ -494,9 +537,9 @@ const ReservaPage: React.FC = () => {
         <button
           type="submit"
           className="w-full bg-blue-600 text-white font-bold py-2 sm:py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed text-sm sm:text-base"
-          disabled={!validarFormulario()}
+          disabled={!validarFormulario() || isLoading}
         >
-          Confirmar reserva
+          {isLoading ? 'Procesando...' : 'Confirmar reserva'}
         </button>
       </form>
 

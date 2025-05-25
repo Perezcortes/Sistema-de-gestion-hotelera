@@ -1,41 +1,33 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import hotelLoginImg from '../assets/hotel-login.jpg';
-
 import NavbarComponent from "../components/Navbar";
 import FooterComponent from "../components/Footer";
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const { login, error, loading } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    if (!username || !password) {
-      setError("Por favor completa todos los campos.");
-      return;
+    try {
+      await login(username, password);
+      // No hace navigate aquí, ya lo hace login() en el contexto
+    } catch (err) {
+      console.error(err);
     }
-    // Aquí va la lógica real de autenticación
-    alert(`Bienvenido, ${username}`);
   };
 
   return (
     <>
       <NavbarComponent />
-
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-yellow-100 px-4 py-8">
         <div className="flex flex-col md:flex-row w-full max-w-4xl bg-white shadow-lg rounded-xl overflow-hidden">
-          {/* Imagen decorativa solo visible en md+ */}
           <div
             className="hidden md:block md:w-1/2 bg-cover bg-center"
             style={{ backgroundImage: `url(${hotelLoginImg})` }}
           />
-
-          {/* Formulario */}
           <div className="w-full md:w-1/2 p-6 sm:p-8">
             <h1 className="text-3xl font-bold text-blue-800 text-center mb-3">Hotel All-In</h1>
             <p className="text-gray-500 text-center mb-6">Bienvenido de nuevo</p>
@@ -51,6 +43,7 @@ const LoginPage: React.FC = () => {
                 className="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
+                required
               />
 
               <input
@@ -59,6 +52,7 @@ const LoginPage: React.FC = () => {
                 className="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                required
               />
 
               <button
@@ -73,7 +67,7 @@ const LoginPage: React.FC = () => {
             <p className="mt-6 text-center text-sm text-gray-600">
               ¿No tienes cuenta?{" "}
               <button
-                onClick={() => navigate("/register")}
+                onClick={() => window.location.href = "/register"}
                 className="text-blue-600 hover:underline font-medium"
               >
                 Regístrate aquí
@@ -82,7 +76,6 @@ const LoginPage: React.FC = () => {
           </div>
         </div>
       </div>
-
       <FooterComponent />
     </>
   );
