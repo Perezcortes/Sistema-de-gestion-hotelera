@@ -52,7 +52,7 @@ const METODOS_PAGO: MetodoPago[] = ['tarjeta', 'paypal', 'transferencia'];
 const ReservaPage: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
-  
+
   // --- ESTADOS ---
   const [form, setForm] = useState<FormData>({
     nombre: user?.username || '',
@@ -107,22 +107,17 @@ const ReservaPage: React.FC = () => {
 
   const calcularPrecioTotal = (): number => {
     const noches = calcularNoches();
-    if (noches <= 0 || !form.tipoHabitacion) return 0;
-
-    // Precio base según tipo de habitación
-    let precioBase = PRECIOS_HABITACION[form.tipoHabitacion];
-    if (form.destino === 'Chiapas') precioBase *= 1.2; // 20% más caro en chiapas
-    if (form.destino === 'Monterrey') precioBase *= 1.1; // 10% más caro en Monterrey
-
-    return precioBase * noches * form.numeroPersonas;
+    return noches > 0 && form.tipoHabitacion
+      ? PRECIOS_HABITACION[form.tipoHabitacion] * noches * form.numeroPersonas
+      : 0;
   };
 
   const validarFormulario = (): boolean => {
     const { nombre, email, telefono, destino, fechaLlegada, fechaSalida, tipoHabitacion, metodoPago } = form;
     return !!(
-      nombre && email && telefono && destino && 
-      fechaLlegada && fechaSalida && 
-      new Date(fechaSalida) > new Date(fechaLlegada) && 
+      nombre && email && telefono && destino &&
+      fechaLlegada && fechaSalida &&
+      new Date(fechaSalida) > new Date(fechaLlegada) &&
       tipoHabitacion && metodoPago
     );
   };
@@ -230,7 +225,7 @@ const ReservaPage: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}` // Asumiendo que usas tokens
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
         },
         body: JSON.stringify(form),
       });
@@ -267,12 +262,12 @@ const ReservaPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6 bg-white rounded-lg shadow-lg my-6 sm:my-10 font-sans relative">
       <ToastContainer />
-      
+
       {/* Modal de Bienvenida */}
       {showWelcomeModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl relative">
-            <button 
+            <button
               onClick={() => setShowWelcomeModal(false)}
               className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
             >
@@ -282,7 +277,7 @@ const ReservaPage: React.FC = () => {
               ¡Bienvenido, {user?.username}!
             </h2>
             <p className="text-center mb-6">
-              Ahora puedes realizar tu reserva en nuestro hotel. 
+              Ahora puedes realizar tu reserva en nuestro hotel.
               Disfruta de nuestros servicios exclusivos y de la mejor atención.
             </p>
             <div className="flex justify-center">
@@ -300,7 +295,7 @@ const ReservaPage: React.FC = () => {
       <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center text-blue-700">Reserva tu experiencia</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-         {/* Sección 1: Datos personales */}
+        {/* Sección 1: Datos personales */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label htmlFor="nombre" className="block font-medium mb-1 text-sm sm:text-base">Nombre completo *</label>
