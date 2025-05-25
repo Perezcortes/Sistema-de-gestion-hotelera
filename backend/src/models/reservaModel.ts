@@ -15,8 +15,13 @@ interface ReservaData {
   comentarios: string;
 }
 
-export const crearReserva = async (reservaData: ReservaData) => {
+interface ReservaConUsuario extends ReservaData {
+  id_usuario: number;
+}
+
+export const crearReserva = async (reservaData: ReservaConUsuario) => {
   const {
+    id_usuario,
     nombre,
     email,
     telefono,
@@ -32,10 +37,11 @@ export const crearReserva = async (reservaData: ReservaData) => {
 
   const [result] = await pool.query<ResultSetHeader>(`
     INSERT INTO reservas (
-      nombre, email, telefono, fecha_llegada, hora_llegada, fecha_salida,
+      id_usuario, nombre, email, telefono, fecha_llegada, hora_llegada, fecha_salida,
       numero_personas, tipo_habitacion, servicios_extra, metodo_pago, comentarios
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `, [
+    id_usuario,
     nombre,
     email,
     telefono,
@@ -50,4 +56,12 @@ export const crearReserva = async (reservaData: ReservaData) => {
   ]);
 
   return result.insertId;
+};
+
+export const obtenerReservasPorUsuario = async (id_usuario: number) => {
+  const [rows] = await pool.query(
+    'SELECT * FROM reservas WHERE id_usuario = ? ORDER BY creada_en DESC',
+    [id_usuario]
+  );
+  return rows;
 };
