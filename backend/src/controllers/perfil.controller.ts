@@ -76,7 +76,7 @@ export const getHistorialReservas = async (req: Request & { user?: { id_usuario:
   }
 
   const [rows] = await pool.query<RowDataPacket[]>(
-    "SELECT * FROM reservas WHERE id_usuario = ? ORDER BY fecha_reserva DESC",
+    "SELECT * FROM reservas WHERE id_usuario = ? ORDER BY creada_en DESC",
     [userId]
   );
 
