@@ -9,7 +9,7 @@ import {
   CalendarCheck,
   Settings,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import ProfileModal from "../components/ModalPerfil";
 import ReservationsModal from "../components/ModalReservas";
@@ -17,6 +17,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const Navbar: React.FC = () => {
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -27,14 +28,25 @@ const Navbar: React.FC = () => {
   const toggleMenu = () => setMenuOpen(!menuOpen);
 
   const handleLogout = () => {
-    logout();
+    toast.success("Sesión cerrada correctamente", {
+      position: "top-right",
+      autoClose: 1000, // El toast será visible durante 1 segundo
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    });
+
     setUserMenuOpen(false);
-    toast.success("Sesión cerrada correctamente");
+
+    setTimeout(() => {
+      logout();      // Cambia estado de autenticación
+      navigate('/'); // Redirige después de 1 segundo
+    }, 1800);
   };
 
   return (
     <>
-      <ToastContainer position="top-right" />
       <nav className="sticky top-0 z-50 bg-white shadow-md">
         {/* Top Bar */}
         <div className="bg-blue-900 text-white text-sm px-4 py-2">
@@ -199,7 +211,7 @@ const Navbar: React.FC = () => {
               </>
             ) : (
               <Link
-                to="/login"
+                to="/"
                 className="block flex items-center text-gray-700 font-medium hover:text-blue-600 transition"
               >
                 <User className="w-4 h-4 mr-1" />
@@ -224,6 +236,7 @@ const Navbar: React.FC = () => {
           onClose={() => setShowReservationsModal(false)}
         />
       )}
+
     </>
   );
 };

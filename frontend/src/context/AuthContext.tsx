@@ -11,6 +11,7 @@ type User = {
 
 type AuthContextType = {
   user: User | null;
+  authToken: string | null;   // <-- Agregado token aquí
   login: (username: string, password: string) => Promise<void>;
   register: (nombre: string, email: string, username: string, password: string) => Promise<void>;
   logout: () => void;
@@ -23,6 +24,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [authToken, setAuthToken] = useState<string | null>(localStorage.getItem('authToken'));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -32,11 +34,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const token = localStorage.getItem('authToken');
       if (token) {
         try {
-          const response = await api.get('/auth/profile');
+          // Opcional: configurar token en headers de api si usas axios
+          const response = await api.get('/auth/profile', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
           setUser(response.data);
+          setAuthToken(token);
         } catch {
           logout();
         }
+      } else {
+        setAuthToken(null);
       }
       setLoading(false);
     };
@@ -47,12 +55,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setLoading(true);
     setError(null);
     try {
-      console.log("Intentando login con:", { username, password });
       const response = await api.post('/auth/login', { username, password });
       localStorage.setItem('authToken', response.data.token);
+      setAuthToken(response.data.token);
       setUser(response.data.user);
-      console.log("Login exitoso, redirigiendo...");
-      // Solo navega aquí
       navigate('/reserva');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Error al iniciar sesión');
@@ -67,7 +73,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setError(null);
     try {
       await api.post('/auth/register', { nombre, email, username, password });
-      await login(username, password); // Auto-login después del registro
+      await login(username, password);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Error al registrar');
       throw err;
@@ -78,20 +84,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const logout = () => {
     localStorage.removeItem('authToken');
+    setAuthToken(null);
     setUser(null);
-    navigate('/login');
   };
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      login,
-      register,
-      logout,
-      isAuthenticated: !!user,
-      loading,
-      error
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        authToken,          // <-- Se pasa aquí el token
+        login,
+        register,
+        logout,
+        isAuthenticated: !!user,
+        loading,
+        error,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
