@@ -18,6 +18,7 @@ type FormData = {
   fechaLlegada: string;
   horaLlegada: string;
   fechaSalida: string;
+  horaSalida: string; // Nuevo campo
   numeroPersonas: number;
   tipoHabitacion: TipoHabitacion | '';
   serviciosExtra: string[];
@@ -62,6 +63,7 @@ const ReservaPage: React.FC = () => {
     fechaLlegada: '',
     horaLlegada: '',
     fechaSalida: '',
+    horaSalida: '', // Nuevo campo
     numeroPersonas: 1,
     tipoHabitacion: '',
     serviciosExtra: [],
@@ -82,7 +84,6 @@ const ReservaPage: React.FC = () => {
       });
       navigate('/login', { state: { from: '/reserva' } });
     } else {
-      // Mostrar modal de bienvenida si es la primera vez que reserva
       const hasReservedBefore = localStorage.getItem('hasReservedBefore');
       if (!hasReservedBefore) {
         setShowWelcomeModal(true);
@@ -130,6 +131,7 @@ const ReservaPage: React.FC = () => {
       fechaLlegada: '',
       horaLlegada: '',
       fechaSalida: '',
+      horaSalida: '',
       numeroPersonas: 1,
       tipoHabitacion: '',
       serviciosExtra: [],
@@ -176,7 +178,7 @@ const ReservaPage: React.FC = () => {
       { label: 'Teléfono', value: form.telefono },
       { label: 'Destino', value: DESTINOS.find(d => d.value === form.destino)?.label || '' },
       { label: 'Fecha de llegada', value: `${form.fechaLlegada} ${form.horaLlegada}` },
-      { label: 'Fecha de salida', value: form.fechaSalida },
+      { label: 'Fecha de salida', value: `${form.fechaSalida} ${form.horaSalida}\n(Nota: Se respetará la hora de salida indicada sin recargos)` }, // Actualizado
       { label: 'Número de personas', value: form.numeroPersonas.toString() },
       { label: 'Tipo de habitación', value: form.tipoHabitacion },
       {
@@ -363,48 +365,70 @@ const ReservaPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Sección 3: Fechas de estadía */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="fechaLlegada" className="block font-medium mb-1 text-sm sm:text-base">Fecha de llegada *</label>
-            <input
-              id="fechaLlegada"
-              name="fechaLlegada"
-              type="date"
-              value={form.fechaLlegada}
-              onChange={handleChange}
-              required
-              min={new Date().toISOString().split('T')[0]}
-              className="w-full border border-gray-300 p-2 sm:p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
-            />
+        {/* Sección 3: Fechas de estadía - Formato solicitado */}
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="fechaLlegada" className="block font-medium mb-1 text-sm sm:text-base">Fecha de llegada *</label>
+              <input
+                id="fechaLlegada"
+                name="fechaLlegada"
+                type="date"
+                value={form.fechaLlegada}
+                onChange={handleChange}
+                required
+                min={new Date().toISOString().split('T')[0]}
+                className="w-full border border-gray-300 p-2 sm:p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
+              />
+            </div>
+            <div>
+              <label htmlFor="horaLlegada" className="block font-medium mb-1 text-sm sm:text-base">Hora aproximada *</label>
+              <input
+                id="horaLlegada"
+                name="horaLlegada"
+                type="time"
+                value={form.horaLlegada}
+                onChange={handleChange}
+                required
+                className="w-full border border-gray-300 p-2 sm:p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
+              />
+            </div>
           </div>
-          <div>
-            <label htmlFor="horaLlegada" className="block font-medium mb-1 text-sm sm:text-base">Hora aproximada</label>
-            <input
-              id="horaLlegada"
-              name="horaLlegada"
-              type="time"
-              value={form.horaLlegada}
-              onChange={handleChange}
-              className="w-full border border-gray-300 p-2 sm:p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
-            />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="fechaSalida" className="block font-medium mb-1 text-sm sm:text-base">Fecha de salida *</label>
+              <input
+                id="fechaSalida"
+                name="fechaSalida"
+                type="date"
+                value={form.fechaSalida}
+                onChange={handleChange}
+                required
+                min={form.fechaLlegada || new Date().toISOString().split('T')[0]}
+                className="w-full border border-gray-300 p-2 sm:p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
+              />
+            </div>
+            <div>
+              <label htmlFor="horaSalida" className="block font-medium mb-1 text-sm sm:text-base">Hora de salida *</label>
+              <input
+                id="horaSalida"
+                name="horaSalida"
+                type="time"
+                value={form.horaSalida}
+                onChange={handleChange}
+                required
+                className="w-full border border-gray-300 p-2 sm:p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
+              />
+              <p className="text-xs text-gray-500 mt-1 italic">
+                * Por favor respete la hora de salida indicada para evitar recargos adicionales.
+              </p>
+            </div>
           </div>
         </div>
 
+        {/* Sección 4: Personas y habitación - Formato solicitado */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="fechaSalida" className="block font-medium mb-1 text-sm sm:text-base">Fecha de salida *</label>
-            <input
-              id="fechaSalida"
-              name="fechaSalida"
-              type="date"
-              value={form.fechaSalida}
-              onChange={handleChange}
-              required
-              min={form.fechaLlegada || new Date().toISOString().split('T')[0]}
-              className="w-full border border-gray-300 p-2 sm:p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
-            />
-          </div>
           <div>
             <label htmlFor="numeroPersonas" className="block font-medium mb-1 text-sm sm:text-base">Número de personas *</label>
             <input
@@ -419,24 +443,22 @@ const ReservaPage: React.FC = () => {
               className="w-full border border-gray-300 p-2 sm:p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
             />
           </div>
-        </div>
-
-        {/* Sección 4: Tipo de habitación */}
-        <div>
-          <label htmlFor="tipoHabitacion" className="block font-medium mb-1 text-sm sm:text-base">Tipo de habitación *</label>
-          <select
-            id="tipoHabitacion"
-            name="tipoHabitacion"
-            value={form.tipoHabitacion}
-            onChange={handleChange}
-            required
-            className="w-full border border-gray-300 p-2 sm:p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
-          >
-            <option value="">Seleccione una opción</option>
-            <option value="individual">Individual ($500/noche)</option>
-            <option value="doble">Doble ($800/noche)</option>
-            <option value="suite">Suite ($1200/noche)</option>
-          </select>
+          <div>
+            <label htmlFor="tipoHabitacion" className="block font-medium mb-1 text-sm sm:text-base">Tipo de habitación *</label>
+            <select
+              id="tipoHabitacion"
+              name="tipoHabitacion"
+              value={form.tipoHabitacion}
+              onChange={handleChange}
+              required
+              className="w-full border border-gray-300 p-2 sm:p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
+            >
+              <option value="">Seleccione una opción</option>
+              <option value="individual">Individual ($500/noche)</option>
+              <option value="doble">Doble ($800/noche)</option>
+              <option value="suite">Suite ($1200/noche)</option>
+            </select>
+          </div>
         </div>
 
         {/* Sección 5: Servicios extra */}
@@ -457,7 +479,6 @@ const ReservaPage: React.FC = () => {
               </label>
             ))}
           </div>
-          {/* Nota agregada aquí */}
           <p className="text-xs text-gray-500 mt-2 italic">
             * Los servicios adicionales seleccionados se cobrarán durante su estadía en el hotel.
           </p>
@@ -507,6 +528,17 @@ const ReservaPage: React.FC = () => {
             <div>
               <p className="font-medium">Noches:</p>
               <p>{form.fechaLlegada && form.fechaSalida ? calcularNoches() : '-'}</p>
+            </div>
+            <div>
+              <p className="font-medium">Check-in:</p>
+              <p>{form.fechaLlegada} {form.horaLlegada}</p>
+            </div>
+            <div>
+              <p className="font-medium">Check-out:</p>
+              <p>{form.fechaSalida} {form.horaSalida && `a las ${form.horaSalida}`}
+                <br />
+                <span className="text-xs text-gray-500">(Sin recargos si se respeta la hora indicada)</span>
+              </p>
             </div>
             <div>
               <p className="font-medium">Huéspedes:</p>
@@ -572,7 +604,7 @@ const ReservaPage: React.FC = () => {
                 <p>{form.fechaLlegada} {form.horaLlegada && `a las ${form.horaLlegada}`}</p>
 
                 <p className="font-medium">Check-out:</p>
-                <p>{form.fechaSalida}</p>
+                <p>{form.fechaSalida} {form.horaSalida && `a las ${form.horaSalida}`}</p>
 
                 <p className="font-medium">Noches:</p>
                 <p>{calcularNoches()}</p>
@@ -628,7 +660,7 @@ const ReservaPage: React.FC = () => {
               <button
                 onClick={() => {
                   setShowModal(false);
-                  limpiarFormulario(); // Limpiar el formulario al cerrar
+                  limpiarFormulario();
                 }}
                 className="flex-1 bg-gray-100 text-gray-800 py-2 px-3 sm:px-4 rounded hover:bg-gray-200 transition text-xs sm:text-sm"
               >

@@ -27,6 +27,7 @@ interface Reserva {
   email: string;
   telefono: string;
   horaLlegada: string;
+  horaSalida: string; // Nuevo campo
 }
 
 // Constantes consistentes con ReservaPage.tsx
@@ -115,7 +116,8 @@ const ModalReservas: React.FC<ModalReservasProps> = ({ isOpen, onClose }) => {
             nombre: reserva.nombre || user?.username || "",
             email: reserva.email || user?.email || "",
             telefono: reserva.telefono || "",
-            horaLlegada: reserva.horaLlegada || reserva.hora_llegada || "", // Mapeo mejorado
+            horaLlegada: reserva.horaLlegada || reserva.hora_llegada || "",
+            horaSalida: reserva.horaSalida || reserva.hora_salida || "" // Nuevo campo
           }));
           setReservas(reservasNormalizadas);
         })
@@ -168,11 +170,13 @@ const ModalReservas: React.FC<ModalReservasProps> = ({ isOpen, onClose }) => {
       { label: "Destino", value: getDestinoLabel(reserva.destino) },
       {
         label: "Check-in",
-        value: `${formatDate(reserva.fecha_llegada)} ${
-          reserva.horaLlegada ? `a las ${reserva.horaLlegada}` : ""
-        }`,
+        value: `${formatDate(reserva.fecha_llegada)} ${reserva.horaLlegada ? `a las ${reserva.horaLlegada}` : ""}`,
       },
-      { label: "Check-out", value: formatDate(reserva.fecha_salida) },
+      { 
+        label: "Check-out", 
+        value: `${formatDate(reserva.fecha_salida)} ${reserva.horaSalida ? `a las ${reserva.horaSalida}` : ""}` +
+               "\n(Nota: No habrá recargos si se respeta la hora de salida indicada)"
+      },
       {
         label: "Noches",
         value: calcularNoches(reserva.fecha_llegada, reserva.fecha_salida).toString(),
@@ -193,9 +197,19 @@ const ModalReservas: React.FC<ModalReservasProps> = ({ isOpen, onClose }) => {
     ];
 
     datosReserva.forEach((item) => {
-      doc.text(`${item.label}:`, 20, yPosition);
-      doc.text(item.value, 70, yPosition);
-      yPosition += 10;
+      // Manejo de valores multilínea
+      if (item.value.includes("\n")) {
+        const lines = item.value.split("\n");
+        doc.text(`${item.label}:`, 20, yPosition);
+        lines.forEach((line, i) => {
+          doc.text(line, 70, yPosition + (i * 5));
+        });
+        yPosition += 10 + ((lines.length - 1) * 5);
+      } else {
+        doc.text(`${item.label}:`, 20, yPosition);
+        doc.text(item.value, 70, yPosition);
+        yPosition += 10;
+      }
     });
 
     yPosition += 5;
@@ -278,12 +292,23 @@ const ModalReservas: React.FC<ModalReservasProps> = ({ isOpen, onClose }) => {
                     </span>
                   </div>
 
-                  {/* Nueva sección para la hora de llegada */}
-                  <div className="mb-2">
-                    <p className="font-medium text-blue-800">Hora de llegada:</p>
-                    <p className="text-sm">
-                      {reserva.horaLlegada || "No especificada"}
-                    </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                    <div>
+                      <p className="font-medium text-blue-800">Check-in:</p>
+                      <p className="text-sm">
+                        {formatDate(reserva.fecha_llegada)} {reserva.horaLlegada && `a las ${reserva.horaLlegada}`}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-blue-800">Check-out:</p>
+                      <p className="text-sm">
+                        {formatDate(reserva.fecha_salida)} {reserva.horaSalida && `a las ${reserva.horaSalida}`}
+                        <br />
+                        <span className="text-xs text-gray-500 italic">
+                          (Sin recargos si se respeta la hora de salida)
+                        </span>
+                      </p>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3 text-sm">
@@ -326,12 +351,20 @@ const ModalReservas: React.FC<ModalReservasProps> = ({ isOpen, onClose }) => {
                     </div>
                   )}
 
-                  <div className="flex justify-between items-center mt-3">
+                  <div className="mt-3">
+                    <p className="font-medium text-blue-800">Método de pago:</p>
+                    <p className="text-sm">{getMetodoPagoLabel(reserva.metodo_pago)}</p>
+                  </div>
+
+                  <div className="flex justify-between items-center mt-4 pt-3 border-t border-blue-200">
                     <p className="font-bold text-blue-900">
                       Total: ${precioTotal.toLocaleString()}
                     </p>
                     <button
-                      onClick={() => generarPDF(reserva)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        generarPDF(reserva);
+                      }}
                       className="bg-green-600 hover:bg-green-700 text-white py-1 px-3 rounded shadow flex items-center gap-1 text-xs sm:text-sm"
                     >
                       <svg

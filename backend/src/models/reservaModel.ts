@@ -8,6 +8,7 @@ interface ReservaData {
   fechaLlegada: string;
   horaLlegada: string;
   fechaSalida: string;
+  horaSalida: string;
   numeroPersonas: number;
   tipoHabitacion: string;
   serviciosExtra: any;
@@ -28,6 +29,7 @@ export const crearReserva = async (reservaData: ReservaConUsuario) => {
     fechaLlegada,
     horaLlegada,
     fechaSalida,
+    horaSalida,
     numeroPersonas,
     tipoHabitacion,
     serviciosExtra,
@@ -37,9 +39,9 @@ export const crearReserva = async (reservaData: ReservaConUsuario) => {
 
   const [result] = await pool.query<ResultSetHeader>(`
     INSERT INTO reservas (
-      id_usuario, nombre, email, telefono, fecha_llegada, hora_llegada, fecha_salida,
+      id_usuario, nombre, email, telefono, fecha_llegada, hora_llegada, fecha_salida, hora_salida,
       numero_personas, tipo_habitacion, servicios_extra, metodo_pago, comentarios
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `, [
     id_usuario,
     nombre,
@@ -48,11 +50,12 @@ export const crearReserva = async (reservaData: ReservaConUsuario) => {
     fechaLlegada,
     horaLlegada,
     fechaSalida,
+    horaSalida,
     numeroPersonas,
     tipoHabitacion,
     JSON.stringify(serviciosExtra),
     metodoPago,
-    comentarios
+    comentarios  // ← Este valor faltaba
   ]);
 
   return result.insertId;
