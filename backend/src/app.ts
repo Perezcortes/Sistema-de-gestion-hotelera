@@ -8,7 +8,12 @@ import adminRoutes from './routes/admin.routes';
 const app = express();
 
 // Middlewares
-app.use(cors());
+
+app.use(cors({
+  origin: 'http://localhost:3000',  // Origen permitido del frontend
+  credentials: true,                // Permitir enviar cookies y credenciales
+}));
+
 app.use(express.json());
 
 // Ruta raíz

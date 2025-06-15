@@ -7,11 +7,13 @@ type User = {
   nombre: string;
   username: string;
   email: string;
+  id_rol: number;
+  nombre_rol: string;
 };
 
 type AuthContextType = {
   user: User | null;
-  authToken: string | null;   // <-- Agregado token aquí
+  authToken: string | null;
   login: (username: string, password: string) => Promise<void>;
   register: (nombre: string, email: string, username: string, password: string) => Promise<void>;
   logout: () => void;
@@ -25,30 +27,30 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [authToken, setAuthToken] = useState<string | null>(localStorage.getItem('authToken'));
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
+  // Verificar autenticación al montar
   useEffect(() => {
-    const checkAuth = async () => {
+    const verifyAuth = async () => {
       const token = localStorage.getItem('authToken');
       if (token) {
         try {
-          // Opcional: configurar token en headers de api si usas axios
+          setLoading(true);
           const response = await api.get('/auth/profile', {
             headers: { Authorization: `Bearer ${token}` },
           });
           setUser(response.data);
           setAuthToken(token);
-        } catch {
+        } catch (err) {
           logout();
+        } finally {
+          setLoading(false);
         }
-      } else {
-        setAuthToken(null);
       }
-      setLoading(false);
     };
-    checkAuth();
+    verifyAuth();
   }, []);
 
   const login = async (username: string, password: string) => {
@@ -56,12 +58,35 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setError(null);
     try {
       const response = await api.post('/auth/login', { username, password });
-      localStorage.setItem('authToken', response.data.token);
-      setAuthToken(response.data.token);
-      setUser(response.data.user);
-      navigate('/reserva');
+      const { token, user } = response.data;
+
+      if (!user?.id_rol) {
+        throw new Error('Datos de usuario incompletos');
+      }
+
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      setAuthToken(token);
+      setUser(user);
+
+      // Redirección basada en el rol
+      switch (user.id_rol) {
+        case 1:
+          navigate('/reserva'); break;
+        case 2:
+        case 6:
+          navigate('/admin'); break;
+        case 3:
+          navigate('/soporte'); break;
+        case 4:
+          navigate('/contador'); break;
+        case 5:
+          navigate('/mantenimiento'); break;
+        default:
+          navigate('/');
+      }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al iniciar sesión');
+      setError(err.response?.data?.message || err.message || 'Error al iniciar sesión');
       throw err;
     } finally {
       setLoading(false);
@@ -84,15 +109,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const logout = () => {
     localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
     setAuthToken(null);
     setUser(null);
+    navigate('/login');
   };
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        authToken,          // <-- Se pasa aquí el token
+        authToken,
         login,
         register,
         logout,

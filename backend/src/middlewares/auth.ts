@@ -1,14 +1,22 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import pool from '../config/database';
 
-interface TokenPayload extends JwtPayload {
-  id_usuario: number;
-  username: string;
+declare global {
+  namespace Express {
+    interface Request {
+      user?: {
+        id_usuario: number;
+        username: string;
+        id_rol: number;
+        nombre_rol: string;
+      };
+    }
+  }
 }
 
 export const authenticateToken = async (
-  req: Request & { user?: { id_usuario: number; username: string } },
+  req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
@@ -21,17 +29,20 @@ export const authenticateToken = async (
   }
 
   try {
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || 'clave_secreta'
-    ) as TokenPayload;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'clave_secreta') as any;
 
-    const [rows]: any = await pool.query(
-      'SELECT id_usuario FROM usuarios WHERE id_usuario = ?',
+    // Verificar que el usuario exista en la base de datos
+    const [user]: any = await pool.query(
+      `SELECT 
+        u.id_usuario, 
+        u.username,
+        COALESCE(u.id_rol, 1) AS id_rol
+       FROM usuarios u
+       WHERE u.id_usuario = ?`,
       [decoded.id_usuario]
     );
 
-    if (rows.length === 0) {
+    if (!user[0]) {
       res.status(401).json({ message: 'Usuario no encontrado' });
       return;
     }
@@ -39,6 +50,8 @@ export const authenticateToken = async (
     req.user = {
       id_usuario: decoded.id_usuario,
       username: decoded.username,
+      id_rol: decoded.id_rol,
+      nombre_rol: decoded.nombre_rol
     };
 
     next();
@@ -46,4 +59,18 @@ export const authenticateToken = async (
     console.error('Error en autenticación:', error);
     res.status(403).json({ message: 'Token inválido o expirado' });
   }
+};
+
+export const checkRole = (roles: number[]) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Usuario no autenticado' });
+    }
+    
+    if (!roles.includes(req.user.id_rol)) {
+      return res.status(403).json({ message: 'No tienes permiso para acceder a este recurso' });
+    }
+    
+    next();
+  };
 };

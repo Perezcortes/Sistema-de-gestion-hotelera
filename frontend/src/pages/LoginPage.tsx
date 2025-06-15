@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom"; // Añadido
 import hotelLoginImg from '../assets/hotel-login.jpg';
 import NavbarComponent from "../components/Navbar";
 import FooterComponent from "../components/Footer";
@@ -8,14 +9,21 @@ const LoginPage: React.FC = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const { login, error, loading } = useAuth();
+  const navigate = useNavigate(); // Añadido
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Iniciando submit..."); // Debug
     try {
+      console.log("Credenciales:", { username, password }); // Debug
       await login(username, password);
-      // No hace navigate aquí, ya lo hace login() en el contexto
+      console.log("Login exitoso, redirigiendo..."); // Debug
     } catch (err) {
-      console.error(err);
+      console.error("Error en login:", err);
+      // Mostrar error específico si está disponible
+      if (err instanceof Error) {
+        console.error("Mensaje de error:", err.message);
+      }
     }
   };
 
@@ -59,6 +67,11 @@ const LoginPage: React.FC = () => {
                 type="submit"
                 disabled={loading}
                 className="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 rounded transition"
+                onClick={(e) => {
+                  e.preventDefault();
+                  console.log("Botón clickeado"); // Debug
+                  handleSubmit(e);
+                }}
               >
                 {loading ? "Ingresando..." : "Iniciar Sesión"}
               </button>
@@ -67,7 +80,7 @@ const LoginPage: React.FC = () => {
             <p className="mt-6 text-center text-sm text-gray-600">
               ¿No tienes cuenta?{" "}
               <button
-                onClick={() => window.location.href = "/register"}
+                onClick={() => navigate("/register")} // Mejorado con useNavigate
                 className="text-blue-600 hover:underline font-medium"
               >
                 Regístrate aquí

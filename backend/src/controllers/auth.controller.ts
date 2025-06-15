@@ -6,7 +6,6 @@ import jwt from "jsonwebtoken";
 const JWT_SECRET = process.env.JWT_SECRET || "clave_secreta";
 const JWT_EXPIRES_IN = "1h";
 
-// Registro de usuario
 export const registerUser = async (req: Request, res: Response): Promise<void> => {
   const { nombre, username, email, password } = req.body;
 
@@ -27,19 +26,17 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // Asignar id_rol = 1 (cliente) por defecto
   const [result]: any = await pool.query(
     "INSERT INTO usuarios (nombre, username, email, password, id_rol) VALUES (?, ?, ?, ?, ?)",
-    [nombre, username, email, hashedPassword, 1]
+    [nombre, username, email, hashedPassword, 1] // Siempre asignar rol 1 (cliente)
   );
 
-  res.status(201).json({ 
-    message: "Usuario registrado correctamente", 
-    id_usuario: result.insertId 
+  res.status(201).json({
+    message: "Usuario registrado correctamente",
+    id_usuario: result.insertId
   });
 };
 
-// Login de usuario
 export const loginUser = async (req: Request, res: Response): Promise<void> => {
   const { username, password } = req.body;
 
@@ -48,69 +45,82 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
-  // Consulta con JOIN para traer el rol
   const [users]: any = await pool.query(
-    `SELECT u.id_usuario, u.nombre, u.username, u.email, u.password, r.id_rol, r.nombre_rol
+    `SELECT 
+      u.id_usuario, 
+      u.nombre, 
+      u.username, 
+      u.email, 
+      u.password, 
+      COALESCE(u.id_rol, 1) AS id_rol,
+      COALESCE(r.nombre_rol, 'cliente') AS nombre_rol
      FROM usuarios u
      LEFT JOIN roles r ON u.id_rol = r.id_rol
      WHERE u.username = ?`,
     [username]
   );
 
-  const user = users[0];
-
-  if (!user) {
+  if (users.length === 0) {
     res.status(401).json({ message: "Credenciales inválidas" });
     return;
   }
 
+  const user = users[0];
   const isMatch = await bcrypt.compare(password, user.password);
+
   if (!isMatch) {
     res.status(401).json({ message: "Credenciales inválidas" });
     return;
   }
 
-  // Crear token con id_rol y nombre_rol
   const token = jwt.sign(
-    { 
-      id_usuario: user.id_usuario, 
-      username: user.username, 
-      id_rol: user.id_rol, 
-      nombre_rol: user.nombre_rol 
+    {
+      id_usuario: user.id_usuario,
+      username: user.username,
+      id_rol: user.id_rol,
+      nombre_rol: user.nombre_rol
     },
     JWT_SECRET,
     { expiresIn: JWT_EXPIRES_IN }
   );
 
-  // Eliminar password antes de enviar el usuario
-  delete user.password;
-
-  res.json({ token, user });
+  res.json({
+    token,
+    user: {
+      id_usuario: user.id_usuario,
+      nombre: user.nombre,
+      username: user.username,
+      email: user.email,
+      id_rol: user.id_rol,
+      nombre_rol: user.nombre_rol
+    }
+  });
 };
 
-// Obtener perfil del usuario autenticado
-export const getUserProfile = async (req: Request & { user?: { id_usuario: number } }, res: Response): Promise<void> => {
-  const userId = req.user?.id_usuario;
-
-  if (!userId) {
+export const getUserProfile = async (req: Request & { user?: any }, res: Response): Promise<void> => {
+  if (!req.user?.id_usuario) {
     res.status(401).json({ message: "Usuario no autenticado" });
     return;
   }
 
   const [rows]: any = await pool.query(
-    `SELECT u.id_usuario, u.nombre, u.username, u.email, r.id_rol, r.nombre_rol
+    `SELECT 
+      u.id_usuario, 
+      u.nombre, 
+      u.username, 
+      u.email, 
+      COALESCE(u.id_rol, 1) AS id_rol,
+      COALESCE(r.nombre_rol, 'cliente') AS nombre_rol
      FROM usuarios u
      LEFT JOIN roles r ON u.id_rol = r.id_rol
      WHERE u.id_usuario = ?`,
-    [userId]
+    [req.user.id_usuario]
   );
 
-  const user = rows[0];
-
-  if (!user) {
+  if (!rows[0]) {
     res.status(404).json({ message: "Usuario no encontrado" });
     return;
   }
 
-  res.json(user);
+  res.json(rows[0]);
 };
