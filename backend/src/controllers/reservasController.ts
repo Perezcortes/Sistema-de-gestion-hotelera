@@ -1,7 +1,7 @@
 // backend/src/controllers/reservasController.ts
 
 import { Request, Response } from 'express';
-import { crearReserva, obtenerReservasPorUsuario } from '../models/reservaModel';
+import { crearReserva, obtenerReservasPorUsuario } from '../models/reserva';
 
 export const registrarReserva = async (req: Request, res: Response): Promise<void> => {
   try {
