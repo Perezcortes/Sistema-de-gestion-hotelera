@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { useAuth } from '../context/AuthContext'; 
+import { useAuth } from '../context/AuthContext';
 import ClientesTable from '../components/admin/ClientesTable';
 import FormularioUsuario from '../components/admin/FormularioUsuario';
 import HistorialReservas from '../components/admin/HistorialReservas';
@@ -58,15 +58,13 @@ const AdminDashboardPage = () => {
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
-      <aside className="w-72 bg-gray-900 text-white flex flex-col p-6 overflow-y-auto min-h-screen shadow-lg">
-        <h2 className="text-3xl font-bold mb-10 text-center tracking-wide select-none">
-          Panel Admin
-        </h2>
-        <nav className="flex flex-col gap-3">
+      <aside className="w-64 bg-gray-900 text-white flex-shrink-0 p-6 overflow-y-auto sticky top-0 h-screen">
+        <h2 className="text-2xl font-bold mb-8 text-center">Panel Admin</h2>
+        <nav className="flex flex-col gap-2">
           {modules.map(({ key, label }) => {
-            const allowed = 
-              (key === 'incidencias' && [2,3].includes(user.id_rol)) ||
-              (key === 'tarifas' && [2,4].includes(user.id_rol)) ||
+            const allowed =
+              (key === 'incidencias' && [2, 3].includes(user.id_rol)) ||
+              (key === 'tarifas' && [2, 4].includes(user.id_rol)) ||
               (key !== 'incidencias' && key !== 'tarifas' && user.id_rol === 2);
 
             if (!allowed) return null;
@@ -75,11 +73,10 @@ const AdminDashboardPage = () => {
               <button
                 key={key}
                 onClick={() => setModuloActual(key)}
-                className={`w-full text-left rounded-lg px-4 py-2 transition 
-                  ${
-                    moduloActual === key
-                      ? 'bg-blue-600 shadow-md font-semibold'
-                      : 'hover:bg-gray-700'
+                className={`w-full text-left rounded px-4 py-2 transition 
+                  ${moduloActual === key
+                    ? 'bg-blue-600 font-medium'
+                    : 'hover:bg-gray-700'
                   }`}
               >
                 {label}
@@ -89,9 +86,11 @@ const AdminDashboardPage = () => {
         </nav>
       </aside>
 
-      {/* Contenido principal */}
-      <main className="flex-1 max-w-7xl mx-auto p-8 overflow-y-auto">
-        {renderModulo()}
+      {/* Contenido principal - Modificado */}
+      <main className="flex-1 p-6 bg-white h-screen overflow-auto">
+        <div className="max-w-full mx-auto h-full">
+          {renderModulo()}
+        </div>
       </main>
     </div>
   );

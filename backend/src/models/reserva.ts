@@ -1,3 +1,4 @@
+// src/services/reserva.service.ts (si están juntos en este archivo también)
 import { ResultSetHeader } from 'mysql2';
 import pool from '../config/database';
 
@@ -55,7 +56,7 @@ export const crearReserva = async (reservaData: ReservaConUsuario) => {
     tipoHabitacion,
     JSON.stringify(serviciosExtra),
     metodoPago,
-    comentarios  // ← Este valor faltaba
+    comentarios
   ]);
 
   return result.insertId;

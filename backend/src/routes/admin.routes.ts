@@ -4,10 +4,10 @@ import { adminController } from '../controllers/admin.controller';
 
 const router = Router();
 
-router.get('/clientes', adminController.getClientes);
+router.get('/usuarios', adminController.getUsuarios);
 router.post('/usuarios', adminController.registrarUsuario);
 router.post('/propuesta-tarifa', adminController.enviarPropuestaTarifa);
-router.get('/reservas', adminController.verHistorialReservas);
+router.get('/reservas', adminController.obtenerReservas);
 router.get('/reportes', adminController.generarReporte);
 
 export default router;

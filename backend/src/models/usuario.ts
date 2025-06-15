@@ -1,9 +1,10 @@
-// src/models/Usuario.ts
+// src/models/usuario.ts
 export class Usuario {
   constructor(
     public id: number,
     public nombre: string,
     public correo: string,
-    public rol: 'Administrador' | 'Recepcionista' | 'Contador' | 'Mantenimiento' | 'Soporte'
+    public rol: string,
+    public fechaRegistro?: string  // opcional si quieres
   ) {}
 }

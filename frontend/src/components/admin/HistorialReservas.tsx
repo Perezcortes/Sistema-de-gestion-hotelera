@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 interface Reserva {
   id: number;
@@ -11,51 +12,90 @@ interface Reserva {
   estado: string;
 }
 
+const estadosDisponibles = ['Confirmada', 'Cancelada', 'Pendiente'];
+
 const HistorialReservas = () => {
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchReservas = async () => {
-      try {
-        const res = await axios.get('/api/admin/reservas');
-        setReservas(res.data);
-      } catch (error) {
-        console.error('Error al cargar historial de reservas', error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchReservas();
   }, []);
 
+  const fetchReservas = async () => {
+    try {
+      const res = await axios.get('/api/admin/reservas');
+      setReservas(res.data);
+    } catch (error) {
+      console.error('Error al cargar historial de reservas', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const actualizarEstado = async (id: number, nuevoEstado: string) => {
+    const confirmacion = await Swal.fire({
+      title: '¿Actualizar estado?',
+      text: `¿Deseas cambiar el estado a "${nuevoEstado}"?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, actualizar',
+      cancelButtonText: 'Cancelar',
+    });
+
+    if (confirmacion.isConfirmed) {
+      try {
+        await axios.put(`/api/admin/reservas/${id}/estado`, { estado: nuevoEstado });
+        setReservas((prev) =>
+          prev.map((res) => (res.id === id ? { ...res, estado: nuevoEstado } : res))
+        );
+        Swal.fire('Actualizado', 'El estado de la reserva fue actualizado.', 'success');
+      } catch (error) {
+        console.error('Error al actualizar estado:', error);
+        Swal.fire('Error', 'No se pudo actualizar el estado.', 'error');
+      }
+    }
+  };
+
   return (
-    <div className="bg-white p-6 rounded shadow">
-      <h2 className="text-2xl font-bold mb-4">Historial de Reservas</h2>
+    <div className="bg-white rounded-lg shadow">
+      <h2 className="text-2xl font-bold mb-6 px-6 pt-6">Historial de Reservas</h2>
       {loading ? (
-        <p>Cargando reservas...</p>
+        <p className="px-6 pb-6">Cargando reservas...</p>
       ) : reservas.length === 0 ? (
-        <p>No hay reservas registradas.</p>
+        <p className="px-6 pb-6">No hay reservas registradas.</p>
       ) : (
-        <div className="overflow-auto">
-          <table className="w-full border text-sm">
-            <thead className="bg-gray-200 text-gray-700">
+        <div className="overflow-x-auto pb-6">
+          <table className="w-full border-collapse">
+            <thead className="bg-gray-50">
               <tr>
-                <th className="border px-4 py-2">Cliente</th>
-                <th className="border px-4 py-2">Habitación</th>
-                <th className="border px-4 py-2">Entrada</th>
-                <th className="border px-4 py-2">Salida</th>
-                <th className="border px-4 py-2">Estado</th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 border-b">Cliente</th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 border-b">Habitación</th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 border-b">Entrada</th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 border-b">Salida</th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 border-b">Estado</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-gray-200">
               {reservas.map((reserva) => (
-                <tr key={reserva.id}>
-                  <td className="border px-4 py-2">{reserva.cliente}</td>
-                  <td className="border px-4 py-2">{reserva.habitacion}</td>
-                  <td className="border px-4 py-2">{reserva.fechaEntrada}</td>
-                  <td className="border px-4 py-2">{reserva.fechaSalida}</td>
-                  <td className="border px-4 py-2">{reserva.estado}</td>
+                <tr key={reserva.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">{reserva.cliente}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{reserva.habitacion}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{reserva.fechaEntrada}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{reserva.fechaSalida}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <select
+                      className="border border-gray-300 rounded px-2 py-1"
+                      value={reserva.estado}
+                      onChange={(e) => actualizarEstado(reserva.id, e.target.value)}
+                    >
+                      {estadosDisponibles.map((estado) => (
+                        <option key={estado} value={estado}>
+                          {estado}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
                 </tr>
               ))}
             </tbody>
