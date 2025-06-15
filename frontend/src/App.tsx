@@ -7,6 +7,7 @@ import {
   Navigate
 } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import AdminDashboardPage from './pages/AdminDashboardPage';
 import Home from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -34,8 +35,10 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 const AppContent = () => {
   const location = useLocation();
-  const hideLayoutPaths = ['/login', '/register'];
-  const hideLayout = hideLayoutPaths.includes(location.pathname);
+  // Ocultar navbar y footer en login, register y cualquier ruta que empiece con /admin
+  const hideLayout =
+    ['/login', '/register'].some(path => location.pathname.startsWith(path)) ||
+    location.pathname.startsWith('/admin');
 
   return (
     <>
@@ -50,6 +53,14 @@ const AppContent = () => {
             element={
               <ProtectedRoute>
                 <ReservaPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminDashboardPage />
               </ProtectedRoute>
             }
           />

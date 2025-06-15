@@ -27,10 +27,10 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // Modificación: Asignar id_rol = 1 por defecto
+  // Asignar id_rol = 1 (cliente) por defecto
   const [result]: any = await pool.query(
     "INSERT INTO usuarios (nombre, username, email, password, id_rol) VALUES (?, ?, ?, ?, ?)",
-    [nombre, username, email, hashedPassword, 1] // <- Añade el valor 1 para id_rol
+    [nombre, username, email, hashedPassword, 1]
   );
 
   res.status(201).json({ 
@@ -48,8 +48,12 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
+  // Consulta con JOIN para traer el rol
   const [users]: any = await pool.query(
-    "SELECT id_usuario, nombre, username, email, password FROM usuarios WHERE username = ?",
+    `SELECT u.id_usuario, u.nombre, u.username, u.email, u.password, r.id_rol, r.nombre_rol
+     FROM usuarios u
+     LEFT JOIN roles r ON u.id_rol = r.id_rol
+     WHERE u.username = ?`,
     [username]
   );
 
@@ -66,8 +70,14 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
+  // Crear token con id_rol y nombre_rol
   const token = jwt.sign(
-    { id_usuario: user.id_usuario, username: user.username },
+    { 
+      id_usuario: user.id_usuario, 
+      username: user.username, 
+      id_rol: user.id_rol, 
+      nombre_rol: user.nombre_rol 
+    },
     JWT_SECRET,
     { expiresIn: JWT_EXPIRES_IN }
   );
@@ -88,7 +98,10 @@ export const getUserProfile = async (req: Request & { user?: { id_usuario: numbe
   }
 
   const [rows]: any = await pool.query(
-    "SELECT id_usuario, nombre, username, email FROM usuarios WHERE id_usuario = ?",
+    `SELECT u.id_usuario, u.nombre, u.username, u.email, r.id_rol, r.nombre_rol
+     FROM usuarios u
+     LEFT JOIN roles r ON u.id_rol = r.id_rol
+     WHERE u.id_usuario = ?`,
     [userId]
   );
 
