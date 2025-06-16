@@ -53,7 +53,7 @@ const AppContent = () => {
   const location = useLocation();
 
   // Rutas donde no quieres mostrar Navbar ni Footer (login, registro y dashboards)
-  const hideLayout = ['/login', '/register'].includes(location.pathname) || location.pathname.startsWith('/admin') || location.pathname.startsWith('/contador') || location.pathname.startsWith('/soporte') || location.pathname.startsWith('/mantenimiento');
+  const hideLayout = ['/login', '/register'].includes(location.pathname) || location.pathname.startsWith('/admin') || location.pathname.startsWith('/contador') || location.pathname.startsWith('/soporte') || location.pathname.startsWith('/mantenimiento') || location.pathname.startsWith('/recepcionista');
 
   return (
     <>
@@ -95,8 +95,8 @@ const AppContent = () => {
                   <RecepcionistaDashboardPage/>
                 </DashboardLayout>
               </ProtectedRoute>
-              }>
-          </Route>
+              }
+            />
           <Route
             path="/contador/*"
             element={
