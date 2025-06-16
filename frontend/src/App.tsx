@@ -10,6 +10,7 @@ import {
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import RecepcionistaDashboardPage from './pages/RecepcionistaDashboardPage';
 import ContadorDashboardPage from './pages/ContadorDashboardPage';
 import SoporteDashboardPage from './pages/SoporteDashboardPage';
 import MantenimientoDashboardPage from './pages/MantenimientoDashboardPage';
@@ -79,13 +80,23 @@ const AppContent = () => {
           <Route
             path="/admin/*"
             element={
-              <ProtectedRoute roles={[2, 6]}>
+              <ProtectedRoute roles={[2]}>
                 <DashboardLayout>
                   <AdminDashboardPage />
                 </DashboardLayout>
               </ProtectedRoute>
             }
           />
+          <Route 
+            path="/recepcionista/*"
+            element={
+              <ProtectedRoute roles={[6]}>
+                <DashboardLayout>
+                  <RecepcionistaDashboardPage/>
+                </DashboardLayout>
+              </ProtectedRoute>
+              }>
+          </Route>
           <Route
             path="/contador/*"
             element={
