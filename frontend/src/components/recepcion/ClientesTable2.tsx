@@ -66,7 +66,7 @@ const UsuariosTable = () => {
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-2xl font-bold mb-6">Lista de Usuarios</h2>
+      <h2 className="text-2xl font-bold mb-6">Lista de Clientes</h2>
       {loading ? (
         <p>Cargando usuarios...</p>
       ) : (

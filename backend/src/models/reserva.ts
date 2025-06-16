@@ -69,3 +69,12 @@ export const obtenerReservasPorUsuario = async (id_usuario: number) => {
   );
   return rows;
 };
+
+export const obtenerReserva = async (id_reserva: number) => {
+  const row = await pool.query(
+    'SELECT * FROM reservas WHERE id_reserva = ?',
+    [id_reserva]
+  );
+
+  return row[0];
+};
