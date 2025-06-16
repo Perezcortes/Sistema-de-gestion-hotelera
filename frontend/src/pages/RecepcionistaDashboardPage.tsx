@@ -2,14 +2,17 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import ClientesTable from '../components/recepcion/ClientesTable2';
+import HistorialReservas from '../components/admin/HistorialReservas';
 
 const modules = [
   { key: 'clientes', label: 'Clientes' },
+  { key: 'reservas', label: 'Historial de Reservas' },
 ];
 
 const RecepcionistaDashboardPage = () => {
   const { user } = useAuth();
   const [moduloActual, setModuloActual] = useState('clientes');
+
 
   if (!user) {
     return (
@@ -23,6 +26,9 @@ const RecepcionistaDashboardPage = () => {
     switch (moduloActual) {
       case 'clientes':
         if (user.id_rol === 6) return <ClientesTable />;
+        break;
+      case 'reservas':
+        if (user.id_rol === 6) return <HistorialReservas />;
         break;
       default:
         return <div>No tienes acceso a este módulo</div>;
@@ -39,7 +45,7 @@ const RecepcionistaDashboardPage = () => {
           {modules.map(({ key, label }) => {
             const allowed =
               (key === 'clientes' && [2, 3, 6].includes(user.id_rol)) ||
-              (key === 'tarifas' && [2, 4].includes(user.id_rol)) ||
+              (key === 'reservas' && [2, 4, 6].includes(user.id_rol)) ||
               (key !== 'incidencias' && key !== 'tarifas' && user.id_rol === 2);
 
             if (!allowed) return null;
