@@ -27,7 +27,7 @@ interface Reserva {
   email: string;
   telefono: string;
   horaLlegada: string;
-  horaSalida: string; // Nuevo campo
+  horaSalida: string;
 }
 
 // Constantes consistentes con ReservaPage.tsx
@@ -80,6 +80,7 @@ const ModalReservas: React.FC<ModalReservasProps> = ({ reservaId, isOpen, onClos
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showModifyMessage, setShowModifyMessage] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -98,7 +99,7 @@ const ModalReservas: React.FC<ModalReservasProps> = ({ reservaId, isOpen, onClos
           return res.json();
         })
         .then((data) => {
-          console.log("Datos recibidos:", data); // Para debugging
+          console.log("Datos recibidos:", data);
           const reservasNormalizadas = data.map((reserva: any) => ({
             id_reserva: reserva.id_reserva || reserva.id || 0,
             destino: reserva.destino || "México",
@@ -117,14 +118,14 @@ const ModalReservas: React.FC<ModalReservasProps> = ({ reservaId, isOpen, onClos
             email: reserva.email || user?.email || "",
             telefono: reserva.telefono || "",
             horaLlegada: reserva.horaLlegada || reserva.hora_llegada || "",
-            horaSalida: reserva.horaSalida || reserva.hora_salida || "" // Nuevo campo
+            horaSalida: reserva.horaSalida || reserva.hora_salida || ""
           }));
           setReservas(reservasNormalizadas);
         })
         .catch((err) => setError(err.message))
         .finally(() => setLoading(false));
     }
-  }, [isOpen, authToken, user]);
+  }, [isOpen, authToken, user, reservaId]);
 
   const getDestinoLabel = (destinoValue: Destino): string => {
     const destino = DESTINOS.find((d) => d.value === destinoValue);
@@ -197,7 +198,6 @@ const ModalReservas: React.FC<ModalReservasProps> = ({ reservaId, isOpen, onClos
     ];
 
     datosReserva.forEach((item) => {
-      // Manejo de valores multilínea
       if (item.value.includes("\n")) {
         const lines = item.value.split("\n");
         doc.text(`${item.label}:`, 20, yPosition);
@@ -234,172 +234,222 @@ const ModalReservas: React.FC<ModalReservasProps> = ({ reservaId, isOpen, onClos
     doc.save(`Reserva_${reserva.id_reserva}_${reserva.destino}.pdf`);
   };
 
+  const handleModifyClick = () => {
+    setShowModifyMessage(true);
+    setTimeout(() => {
+      setShowModifyMessage(false);
+    }, 3000);
+  };
+
   if (!isOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4"
-      onClick={onClose}
-    >
+    <>
+      {/* Modal principal */}
       <div
-        className="bg-white rounded-lg p-6 w-full max-w-3xl shadow-xl max-h-[90vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
+        className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4"
+        onClick={onClose}
       >
-        <h2 className="text-2xl font-bold mb-4 text-center text-blue-700">
-          Historial de Reservas
-        </h2>
+        <div
+          className="bg-white rounded-lg p-6 w-full max-w-3xl shadow-xl max-h-[90vh] overflow-y-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <h2 className="text-2xl font-bold mb-4 text-center text-blue-700">
+            Historial de Reservas
+          </h2>
 
-        {loading && (
-          <div className="flex justify-center items-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-          </div>
-        )}
+          {loading && (
+            <div className="flex justify-center items-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            </div>
+          )}
 
-        {error && (
-          <p className="text-center text-red-600 bg-red-50 p-3 rounded-lg">
-            {error}
-          </p>
-        )}
+          {error && (
+            <p className="text-center text-red-600 bg-red-50 p-3 rounded-lg">
+              {error}
+            </p>
+          )}
 
-        {!loading && reservas.length === 0 && (
-          <p className="text-center text-gray-600 py-8">
-            No tienes reservas registradas.
-          </p>
-        )}
+          {!loading && reservas.length === 0 && (
+            <p className="text-center text-gray-600 py-8">
+              No tienes reservas registradas.
+            </p>
+          )}
 
-        {!loading && reservas.length > 0 && (
-          <div className="space-y-4">
-            {reservas.map((reserva) => {
-              const precioTotal = calcularPrecioTotal(
-                reserva.tipo_habitacion,
-                reserva.destino,
-                reserva.fecha_llegada,
-                reserva.fecha_salida,
-                reserva.numero_personas
-              );
+          {!loading && reservas.length > 0 && (
+            <div className="space-y-4">
+              {reservas.map((reserva) => {
+                const precioTotal = calcularPrecioTotal(
+                  reserva.tipo_habitacion,
+                  reserva.destino,
+                  reserva.fecha_llegada,
+                  reserva.fecha_salida,
+                  reserva.numero_personas
+                );
 
-              return (
-                <div
-                  key={reserva.id_reserva}
-                  className="border border-blue-200 rounded-lg p-4 bg-blue-50 hover:bg-blue-100 transition-colors"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-bold text-blue-800">
-                      Reserva #{reserva.id_reserva} - {reserva.destino}
-                    </h3>
-                    <span className="bg-blue-200 text-blue-800 text-xs px-2 py-1 rounded">
-                      {formatDate(reserva.fecha_llegada)} → {formatDate(reserva.fecha_salida)}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                    <div>
-                      <p className="font-medium text-blue-800">Check-in:</p>
-                      <p className="text-sm">
-                        {formatDate(reserva.fecha_llegada)} {reserva.horaLlegada && `a las ${reserva.horaLlegada}`}
-                      </p>
+                return (
+                  <div
+                    key={reserva.id_reserva}
+                    className="border border-blue-200 rounded-lg p-4 bg-blue-50 hover:bg-blue-100 transition-colors"
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-bold text-blue-800">
+                        Reserva #{reserva.id_reserva} - {reserva.destino}
+                      </h3>
+                      <span className="bg-blue-200 text-blue-800 text-xs px-2 py-1 rounded">
+                        {formatDate(reserva.fecha_llegada)} → {formatDate(reserva.fecha_salida)}
+                      </span>
                     </div>
-                    <div>
-                      <p className="font-medium text-blue-800">Check-out:</p>
-                      <p className="text-sm">
-                        {formatDate(reserva.fecha_salida)} {reserva.horaSalida && `a las ${reserva.horaSalida}`}
-                        <br />
-                        <span className="text-xs text-gray-500 italic">
-                          (Sin recargos si se respeta la hora de salida)
-                        </span>
-                      </p>
-                    </div>
-                  </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3 text-sm">
-                    <div>
-                      <p className="font-medium text-blue-800">Huéspedes:</p>
-                      <p>{reserva.numero_personas} persona(s)</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                      <div>
+                        <p className="font-medium text-blue-800">Check-in:</p>
+                        <p className="text-sm">
+                          {formatDate(reserva.fecha_llegada)} {reserva.horaLlegada && `a las ${reserva.horaLlegada}`}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="font-medium text-blue-800">Check-out:</p>
+                        <p className="text-sm">
+                          {formatDate(reserva.fecha_salida)} {reserva.horaSalida && `a las ${reserva.horaSalida}`}
+                          <br />
+                          <span className="text-xs text-gray-500 italic">
+                            (Sin recargos si se respeta la hora de salida)
+                          </span>
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium text-blue-800">Habitación:</p>
-                      <p className="capitalize">{reserva.tipo_habitacion}</p>
-                    </div>
-                    <div>
-                      <p className="font-medium text-blue-800">Noches:</p>
-                      <p>
-                        {calcularNoches(reserva.fecha_llegada, reserva.fecha_salida)}
-                      </p>
-                    </div>
-                  </div>
 
-                  <div className="mb-2">
-                    <p className="font-medium text-blue-800">Destino:</p>
-                    <p className="text-sm">{getDestinoLabel(reserva.destino)}</p>
-                  </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3 text-sm">
+                      <div>
+                        <p className="font-medium text-blue-800">Huéspedes:</p>
+                        <p>{reserva.numero_personas} persona(s)</p>
+                      </div>
+                      <div>
+                        <p className="font-medium text-blue-800">Habitación:</p>
+                        <p className="capitalize">{reserva.tipo_habitacion}</p>
+                      </div>
+                      <div>
+                        <p className="font-medium text-blue-800">Noches:</p>
+                        <p>
+                          {calcularNoches(reserva.fecha_llegada, reserva.fecha_salida)}
+                        </p>
+                      </div>
+                    </div>
 
-                  {reserva.servicios_extra.length > 0 && (
                     <div className="mb-2">
-                      <p className="font-medium text-blue-800">Servicios:</p>
-                      <p className="text-sm">
-                        {reserva.servicios_extra.join(", ")} (se cobrarán durante la estadía)
-                      </p>
+                      <p className="font-medium text-blue-800">Destino:</p>
+                      <p className="text-sm">{getDestinoLabel(reserva.destino)}</p>
                     </div>
-                  )}
 
-                  {reserva.comentarios && (
-                    <div className="mb-2">
-                      <p className="font-medium text-blue-800">Comentarios:</p>
-                      <p className="text-sm italic bg-blue-100 p-2 rounded">
-                        {reserva.comentarios}
-                      </p>
+                    {reserva.servicios_extra.length > 0 && (
+                      <div className="mb-2">
+                        <p className="font-medium text-blue-800">Servicios:</p>
+                        <p className="text-sm">
+                          {reserva.servicios_extra.join(", ")} (se cobrarán durante la estadía)
+                        </p>
+                      </div>
+                    )}
+
+                    {reserva.comentarios && (
+                      <div className="mb-2">
+                        <p className="font-medium text-blue-800">Comentarios:</p>
+                        <p className="text-sm italic bg-blue-100 p-2 rounded">
+                          {reserva.comentarios}
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="mt-3">
+                      <p className="font-medium text-blue-800">Método de pago:</p>
+                      <p className="text-sm">{getMetodoPagoLabel(reserva.metodo_pago)}</p>
                     </div>
-                  )}
 
-                  <div className="mt-3">
-                    <p className="font-medium text-blue-800">Método de pago:</p>
-                    <p className="text-sm">{getMetodoPagoLabel(reserva.metodo_pago)}</p>
-                  </div>
-
-                  <div className="flex justify-between items-center mt-4 pt-3 border-t border-blue-200">
-                    <p className="font-bold text-blue-900">
-                      Total: ${precioTotal.toLocaleString()}
-                    </p>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        generarPDF(reserva);
-                      }}
-                      className="bg-green-600 hover:bg-green-700 text-white py-1 px-3 rounded shadow flex items-center gap-1 text-xs sm:text-sm"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
+                    <div className="flex justify-between items-center mt-4 pt-3 border-t border-blue-200">
+                      <p className="font-bold text-blue-900">
+                        Total: ${precioTotal.toLocaleString()}
+                      </p>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          generarPDF(reserva);
+                        }}
+                        className="bg-green-600 hover:bg-green-700 text-white py-1 px-3 rounded shadow flex items-center gap-1 text-xs sm:text-sm"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                        />
-                      </svg>
-                      Descargar
-                    </button>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                          />
+                        </svg>
+                        Descargar
+                      </button>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+                );
+              })}
+            </div>
+          )}
 
-        <div className="mt-6 flex justify-center">
-          <button
-            onClick={onClose}
-            className="bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-6 rounded transition"
-          >
-            Cerrar
-          </button>
+          <div className="mt-6 flex flex-col items-center gap-4">
+            <button
+              onClick={handleModifyClick}
+              className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded transition"
+            >
+              Modificar
+            </button>
+
+            <button
+              onClick={onClose}
+              className="bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-6 rounded transition"
+            >
+              Cerrar
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Modal de mensaje de modificación */}
+      {showModifyMessage && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-xl animate-fade-in">
+            <div className="text-center">
+              <svg
+                className="mx-auto h-12 w-12 text-blue-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <h3 className="mt-2 text-lg font-medium text-gray-900">
+                Implementando acción
+              </h3>
+              <div className="mt-2 text-sm text-gray-500">
+                Por favor sea paciente...
+              </div>
+              <div className="mt-4 flex justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

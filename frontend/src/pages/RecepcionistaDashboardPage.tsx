@@ -4,6 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import ClientesTable from '../components/recepcion/ClientesTable2';
 import HistorialReservas from '../components/recepcion/HistorialReservas2';
 
+
+
 const modules = [
   { key: 'clientes', label: 'Clientes' },
   { key: 'reservas', label: 'Historial de Reservas' },
