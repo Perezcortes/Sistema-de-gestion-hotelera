@@ -15,6 +15,13 @@ declare global {
   }
 }
 
+if (!process.env.JWT_SECRET) {
+  // Esto detendrá tu servidor si la variable no está configurada,
+  // lo cual es deseable para evitar inconsistencias de seguridad.
+  console.error('ERROR: JWT_SECRET no está definido en las variables de entorno.');
+  process.exit(1);
+}
+
 export const authenticateToken = async (
   req: Request,
   res: Response,
@@ -30,7 +37,7 @@ export const authenticateToken = async (
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'clave_secreta') as any;
-
+    
     // Verificar que el usuario exista en la base de datos
     const [user]: any = await pool.query(
       `SELECT 
