@@ -10,7 +10,7 @@ import { Perfil } from "../models/perfil";
 import { Incidencia } from "../models/incidencia";
 import { Autenticacion } from "../models/autenticacion";
 
-export const simularUsoDeModelos = (_req: Request, res: Response): void => {
+export const accionesHuesped = (_req: Request, res: Response): void => {
 
   const huesped = new Huesped("Ejemplo", "ejemplo@gmail.com", "1234567890");
   const reserva: Reserva = {

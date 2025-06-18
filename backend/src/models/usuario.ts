@@ -7,4 +7,9 @@ export class Usuario {
     public rol: string,
     public fechaRegistro?: string  // opcional 
   ) {}
+
+  loggin(): boolean {
+    console.log(`Usuario ${this.nombre} ha iniciado sesión.`);
+    return true;
+  }
 }

@@ -35,10 +35,10 @@ import { Reserva } from '../models/reserva.model';
     comentarios: 'Sin comentarios'
   };
 
-  admin.generarReporte();
+  admin.generarReporteIncidencias([]);
   auth.iniciarSesion('admin@hotel.com', 'admin123');
   cliente.nombre;
-  contador.revisarTarifa(new Tarifa(0, 'Simulada', 1000));
+  contador.evaluarTarifa(new Tarifa(0, 'Simulada', 1000));
   incidencia.descripcion;
   reporte.generarReporteVentas();
 })();

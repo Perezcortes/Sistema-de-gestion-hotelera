@@ -57,7 +57,7 @@ const UsuariosTable = () => {
 
   const editarUsuario = (usuario: Usuario) => {
     Swal.fire({
-      title: 'Función no implementada',
+      title: 'Editar Usuario',
       text: `Formulario para editar a ${usuario.nombre}.`,
       icon: 'info',
     });
