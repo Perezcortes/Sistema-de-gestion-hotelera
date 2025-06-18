@@ -4,13 +4,14 @@ import { useAuth } from '../context/AuthContext';
 import ClientesTable from '../components/recepcion/ClientesTable2';
 import HistorialReservas from '../components/recepcion/HistorialReservas2';
 import ReservaPage from '../pages/ReservaPage';
-
+import HotelAvailability from '../components/recepcion/Disponibilidad';
 
 
 const modules = [
   { key: 'clientes', label: 'Clientes' },
   { key: 'reservas', label: 'Historial de Reservas' },
   { key: 'nuevaReserva', label: 'Nueva Reserva' },
+  { key: 'disponibilidad', label: 'Disponibilidad' },
 ];
 
 const RecepcionistaDashboardPage = () => {
@@ -37,6 +38,9 @@ const RecepcionistaDashboardPage = () => {
       case 'nuevaReserva':
         if (user.id_rol === 6) return <ReservaPage />;
         break;
+      case 'disponibilidad':
+        if (user.id_rol === 6) return <HotelAvailability />;
+        break;
       default:
         return <div>No tienes acceso a este módulo</div>;
     }
@@ -53,7 +57,8 @@ const RecepcionistaDashboardPage = () => {
             const allowed =
               (key === 'clientes' && [2, 3, 6].includes(user.id_rol)) ||
               (key === 'reservas' && [2, 4, 6].includes(user.id_rol)) ||
-              (key === 'nuevaReserva' && [6].includes(user.id_rol));
+              (key === 'nuevaReserva' && [6].includes(user.id_rol)) ||
+              (key === 'disponibilidad' && [6].includes(user.id_rol));
 
             if (!allowed) return null;
 
