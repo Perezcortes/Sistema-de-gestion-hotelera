@@ -1,8 +1,67 @@
+// src/controllers/admin.controller.ts
 import { Request, Response } from "express";
 import { RowDataPacket } from "mysql2";
 import pool from "../config/database";
 
-export const getPerfil = async (req: Request & { user?: { id_usuario: number } }, res: Response): Promise<void> => {
+import { Huesped } from "../models/huesped";
+import { Reserva } from "../models/reserva.model";
+import { Factura } from "../models/factura";
+import { Perfil } from "../models/perfil";
+import { Incidencia } from "../models/incidencia";
+import { Autenticacion } from "../models/autenticacion";
+
+export const accionesHuesped = (_req: Request, res: Response): void => {
+
+  const huesped = new Huesped("Ejemplo", "ejemplo@gmail.com", "1234567890");
+  const reserva: Reserva = {
+    nombre: "Juan Pérez",
+    email: "juan@example.com",
+    telefono: "123456789",
+    fechaLlegada: "2025-07-01",
+    horaLlegada: "14:00",
+    fechaSalida: "2025-07-05",
+    horaSalida: "11:00",
+    numeroPersonas: 2,
+    tipoHabitacion: "doble",
+    serviciosExtra: [],
+    metodoPago: "tarjeta",
+    comentarios: ""
+  };
+  const factura = new Factura(
+    "Juan Pérez",
+    "juan@example.com",
+    "123456789",
+    "Playa Azul",
+    "2025-07-01",
+    "14:00",
+    "2025-07-05",
+    "11:00",
+    4,
+    2,
+    "doble",
+    ["Spa", "Desayuno"],
+    "tarjeta"
+  );
+  const perfil = new Perfil("Juan Pérez", "juanp", "juan@example.com");
+  const incidencia = new Incidencia(1, "Aire acondicionado no funciona", new Date().toISOString());
+  const autenticacion = new Autenticacion();
+
+  res.json({
+    mensaje: "Modelos simulados correctamente",
+    huesped,
+    reserva,
+    factura,
+    perfil,
+    incidencia,
+    autenticacion
+  });
+};
+
+
+export const getPerfil = async (
+  req: Request & { user?: { id_usuario: number } },
+  res: Response
+): Promise<void> => {
   const userId = req.user?.id_usuario;
 
   if (!userId) {
@@ -43,7 +102,6 @@ export const updatePerfil = async (
   }
 
   try {
-    // Verificar si username o email ya están en uso por otro usuario
     const [existing]: any = await pool.query(
       "SELECT id_usuario FROM usuarios WHERE (username = ? OR email = ?) AND id_usuario != ?",
       [username, email, userId]
@@ -54,7 +112,6 @@ export const updatePerfil = async (
       return;
     }
 
-    // Actualizar datos
     await pool.query(
       "UPDATE usuarios SET nombre = ?, username = ?, email = ? WHERE id_usuario = ?",
       [nombre, username, email, userId]
@@ -67,7 +124,10 @@ export const updatePerfil = async (
   }
 };
 
-export const getHistorialReservas = async (req: Request & { user?: { id_usuario: number } }, res: Response): Promise<void> => {
+export const getHistorialReservas = async (
+  req: Request & { user?: { id_usuario: number } },
+  res: Response
+): Promise<void> => {
   const userId = req.user?.id_usuario;
 
   if (!userId) {

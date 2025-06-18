@@ -32,7 +32,7 @@ const ModuloIncidencias = () => {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow max-w-lg mx-auto">
-      <h2 className="text-2xl font-bold mb-4">Reportar Incidencia</h2>
+      <h2 className="text-2xl font-bold mb-4">Reportar Incidencia a Soporte Técnico</h2>
       <form onSubmit={handleSubmit}>
         <textarea
           className="w-full p-3 border border-gray-300 rounded resize-none focus:outline-none focus:ring-2 focus:ring-red-500 mb-3"

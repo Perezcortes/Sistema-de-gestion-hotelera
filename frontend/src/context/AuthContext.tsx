@@ -103,8 +103,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         case 1:
           navigate('/reserva'); break;
         case 2:
-        case 6:
           navigate('/admin'); break;
+        case 6:
+          navigate('/recepcionista'); break;
         case 3:
           navigate('/soporte'); break;
         case 4:

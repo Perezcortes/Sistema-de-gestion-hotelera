@@ -10,6 +10,7 @@ import {
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import RecepcionistaDashboardPage from './pages/RecepcionistaDashboardPage';
 import ContadorDashboardPage from './pages/ContadorDashboardPage';
 import SoporteDashboardPage from './pages/SoporteDashboardPage';
 import MantenimientoDashboardPage from './pages/MantenimientoDashboardPage';
@@ -52,7 +53,7 @@ const AppContent = () => {
   const location = useLocation();
 
   // Rutas donde no quieres mostrar Navbar ni Footer (login, registro y dashboards)
-  const hideLayout = ['/login', '/register'].includes(location.pathname) || location.pathname.startsWith('/admin') || location.pathname.startsWith('/contador') || location.pathname.startsWith('/soporte') || location.pathname.startsWith('/mantenimiento');
+  const hideLayout = ['/login', '/register'].includes(location.pathname) || location.pathname.startsWith('/admin') || location.pathname.startsWith('/contador') || location.pathname.startsWith('/soporte') || location.pathname.startsWith('/mantenimiento') || location.pathname.startsWith('/recepcionista');
 
   return (
     <>
@@ -79,13 +80,23 @@ const AppContent = () => {
           <Route
             path="/admin/*"
             element={
-              <ProtectedRoute roles={[2, 6]}>
+              <ProtectedRoute roles={[2]}>
                 <DashboardLayout>
                   <AdminDashboardPage />
                 </DashboardLayout>
               </ProtectedRoute>
             }
           />
+          <Route 
+            path="/recepcionista/*"
+            element={
+              <ProtectedRoute roles={[6]}>
+                <DashboardLayout>
+                  <RecepcionistaDashboardPage/>
+                </DashboardLayout>
+              </ProtectedRoute>
+              }
+            />
           <Route
             path="/contador/*"
             element={

@@ -22,7 +22,8 @@ const UsuariosTable = () => {
   const fetchUsuarios = async () => {
     try {
       const res = await axios.get('http://localhost:3001/api/admin/usuarios');
-      setUsuarios(res.data);
+      const clientes = res.data.filter((usuario: Usuario) => usuario.rol.toLowerCase() === 'cliente');
+      setUsuarios(clientes);
     } catch (error) {
       console.error('Error al obtener los usuarios:', error);
     } finally {
@@ -57,7 +58,7 @@ const UsuariosTable = () => {
 
   const editarUsuario = (usuario: Usuario) => {
     Swal.fire({
-      title: 'Editar Usuario',
+      title: 'Función no implementada',
       text: `Formulario para editar a ${usuario.nombre}.`,
       icon: 'info',
     });
@@ -65,7 +66,7 @@ const UsuariosTable = () => {
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-2xl font-bold mb-6">Lista de Usuarios</h2>
+      <h2 className="text-2xl font-bold mb-6">Lista de Clientes</h2>
       {loading ? (
         <p>Cargando usuarios...</p>
       ) : (

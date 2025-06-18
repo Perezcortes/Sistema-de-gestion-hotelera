@@ -6,4 +6,12 @@ export class Reporte {
       totalIngresos: 35400,
     };
   }
+
+  generarReporteIncidencias(): object {
+    return {
+      totalIncidencias: 12,
+      incidenciasResueltas: 10,
+      incidenciasPendientes: 2,
+    };
+  }
 }

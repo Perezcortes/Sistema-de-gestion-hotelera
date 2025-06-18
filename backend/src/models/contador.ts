@@ -2,8 +2,7 @@
 import { Tarifa } from './tarifa';
 
 export class Contador {
-  revisarTarifa(tarifa: Tarifa): 'aprobado' | 'rechazado' {
-    // simulación
+  evaluarTarifa(tarifa: Tarifa): 'aprobado' | 'rechazado' {
     return Math.random() > 0.5 ? 'aprobado' : 'rechazado';
   }
 }

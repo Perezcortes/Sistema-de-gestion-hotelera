@@ -5,6 +5,11 @@ export class Usuario {
     public nombre: string,
     public correo: string,
     public rol: string,
-    public fechaRegistro?: string  // opcional si quieres
+    public fechaRegistro?: string  // opcional 
   ) {}
+
+  loggin(): boolean {
+    console.log(`Usuario ${this.nombre} ha iniciado sesión.`);
+    return true;
+  }
 }
