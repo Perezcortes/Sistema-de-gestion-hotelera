@@ -9,10 +9,8 @@ export class Administrador {
   ) {}
 
   registrarUsuario(usuario: Usuario) {
-    // lógica para registrar usuario
   }
 
   generarReporte() {
-    // lógica para generar reporte
   }
 }

@@ -5,6 +5,6 @@ export class Usuario {
     public nombre: string,
     public correo: string,
     public rol: string,
-    public fechaRegistro?: string  // opcional si quieres
+    public fechaRegistro?: string  // opcional 
   ) {}
 }

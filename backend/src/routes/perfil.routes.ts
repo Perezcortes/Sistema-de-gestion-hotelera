@@ -3,7 +3,7 @@ import {
   getPerfil,
   updatePerfil,
   getHistorialReservas,
-} from "../controllers/perfil.controller";
+} from "../controllers/huesped.controller";
 import { authenticateToken } from "../middlewares/auth";
 import { asyncHandler } from "../utils/asyncHandler";
 

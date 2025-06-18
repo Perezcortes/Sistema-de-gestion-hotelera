@@ -17,7 +17,6 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({ isOpen, onClose }) => {
   const [email, setEmail] = useState(user?.email || "");
   const [loading, setLoading] = useState(false);
 
-  // Toast IDs separados para evitar conflictos
   const errorToastId = useRef<string | number | null>(null);
   const successToastId = useRef<string | number | null>(null);
 
@@ -38,7 +37,7 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({ isOpen, onClose }) => {
       errorToastId.current = toast.error(message, {
         autoClose: 2000,
         onClose: () => {
-          errorToastId.current = null; // Resetear ID al cerrar
+          errorToastId.current = null;
         },
       });
     }
@@ -47,7 +46,7 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({ isOpen, onClose }) => {
   const showSuccessToast = (message: string) => {
     if (successToastId.current === null || !toast.isActive(successToastId.current)) {
       successToastId.current = toast.success(message, {
-        autoClose: 1000, // <--- Aquí medio segundo
+        autoClose: 1000,
         onClose: () => {
           successToastId.current = null;
         },
@@ -55,7 +54,6 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  // Función para limpiar toasts activos (especialmente el toast de éxito)
   const dismissToasts = () => {
     if (successToastId.current !== null) {
       toast.dismiss(successToastId.current);
@@ -101,7 +99,6 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({ isOpen, onClose }) => {
         dismissToasts();
         window.location.reload();
       }, 1000);
-
     } catch (error: any) {
       showErrorToast(
         error.response?.data?.mensaje || error.message || "Error al actualizar perfil"
@@ -111,7 +108,6 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  // También limpiamos toasts al cerrar el modal (si el usuario cancela)
   const handleClose = () => {
     dismissToasts();
     onClose();
