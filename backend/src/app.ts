@@ -4,6 +4,9 @@ import authRoutes from './routes/auth.routes';
 import reservasRoutes from './routes/reservas.routes'; 
 import perfilRoutes from './routes/perfil.routes'; 
 import adminRoutes from './routes/admin.routes'; 
+import solicitudRoutes from './routes/Solicitud.route';
+import tareaRoutes from './routes/tarea.routes'; 
+import habitacionRoutes from './routes/habitacion.routes';
 
 const app = express();
 
@@ -28,5 +31,10 @@ app.use('/api/usuarios', perfilRoutes);
 
 // Rutas del administrador
 app.use('/api/admin', adminRoutes);
+
+//ruta mantenimiento
+app.use('/api', solicitudRoutes);
+app.use('/api', tareaRoutes);
+app.use('/api', habitacionRoutes);
 
 export default app;

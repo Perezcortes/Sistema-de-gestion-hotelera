@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api';
 
 type User = {
+  [x: string]: any;
   id_usuario: number;
   nombre: string;
   username: string;
   email: string;
   id_rol: number;
   nombre_rol: string;
+  token: string;
 };
 
 type AuthContextType = {
@@ -51,6 +53,33 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     };
     verifyAuth();
+  }, []);
+
+  // Función para cargar el usuario y el token cuando la página se refresca
+  const loadUserFromLocalStorageAndVerify = async (token: string) => {
+    try {
+      setLoading(true);
+      const response = await api.get('/auth/profile', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      // Importante: La respuesta de /auth/profile NO incluye el token.
+      // Debemos adjuntar el token que ya tenemos desde localStorage al objeto user.
+      const userDataFromProfile = response.data;
+      setUser({ ...userDataFromProfile, token: token }); // <-- ¡AQUÍ ESTÁ EL CAMBIO CLAVE!
+      setAuthToken(token); // Este es tu estado para el token principal
+    } catch (err) {
+      console.error("Error verifying token or loading profile:", err);
+      logout(); // Si falla, significa que el token no es válido o expiró
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      loadUserFromLocalStorageAndVerify(token);
+    }
   }, []);
 
   const login = async (username: string, password: string) => {
