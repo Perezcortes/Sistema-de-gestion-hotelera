@@ -8,4 +8,12 @@ export class Huesped {
   toString() {
     return `${this.nombre} (${this.email})`;
   }
+
+  actualizarDatos(nuevoNombre: string, nuevoEmail: string) {
+    this.nombre = nuevoNombre;
+    this.email = nuevoEmail;
+  }
+
 }
+
+

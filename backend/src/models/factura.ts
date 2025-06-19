@@ -21,3 +21,5 @@ export class Factura {
     return `Factura para ${this.nombre}: $${this.total.toLocaleString()}`;
   }
 }
+
+
