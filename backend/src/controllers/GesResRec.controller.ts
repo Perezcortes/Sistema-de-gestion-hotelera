@@ -5,15 +5,18 @@ import { obtenerUsuarios } from "../services/cliente.service";
 import { crearReserva, obtenerReserva } from "../models/reserva";
 import { verificarDisponibilidad } from "../services/habitacion.service";
 
+
 import { Recepcionista } from '../models/recepcionista';
 import { Huesped } from "../models/huesped";
 import { Factura } from "../models/factura";
 import { Perfil } from "../models/perfil";
 import { Reserva } from '../models/reserva.model';
+import { Habitacion } from "../models/habitacion";
 
 
 (() => {
   const recepcionista = new Recepcionista(1, 'Ana López', 'recepcion@hotel.com');
+  const habitacion = new Habitacion(101, 'Suite', '150.00');
   const huesped = new Huesped('María González','maria@example.com','555-987654');  
   const factura = new Factura('Carlos Martínez','carlos@email.com','555-1234567','Hotel Paradisíaco','2025-06-20','15:00','2025-06-25','11:00',5,2,'Suite Deluxe',['SPA', 'Desayuno'],'Tarjeta de crédito','Por favor, habitación alta y silenciosa',1250.75);
   const perfil = new Perfil('Ana López','analopez','ana@hotel.com');  
@@ -32,11 +35,12 @@ import { Reserva } from '../models/reserva.model';
     comentarios: 'Llegará tarde'
   };
 
-  // Simulación de operaciones
+  
   perfil.actualizar('Ana López Actualizada', 'analopez_actualizada', 'ana_actualizada@hotel.com');
   recepcionista.registrarReserva(Reserva);
   huesped.actualizarDatos('Carlos Martínez Jr.', 'carlos.jr@email.com');
   factura.generarResumen();
+  Habitacion.verificarDisponibilidad('2025-06-20', '2025-06-25');
 
 })();
 
