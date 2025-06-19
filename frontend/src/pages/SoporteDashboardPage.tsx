@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import IncidenciasTable from '../components/soporte/IncidenciasTable';
-import ReportesIncidencias from '../components/soporte/ReportesIncidencias';
+import IncidenciasTable from '../components/IncidenciasTable';
+import ReportesIncidencias from '../components/ReportesIncidencias';
 
 const modules = [
   { key: 'incidencias', label: 'Incidencias' },
