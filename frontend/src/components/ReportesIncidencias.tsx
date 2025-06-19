@@ -1,6 +1,5 @@
 'use client';
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -19,7 +18,20 @@ interface ReporteIncidencia {
   total: number;
   resueltas: number;
   pendientes: number;
+  altaPrioridad: number;
+  mediaPrioridad: number;
+  bajaPrioridad: number;
 }
+
+// Datos simulados de reporte para incidencias del sistema
+const reporteSimulado: ReporteIncidencia[] = [
+  { mes: 'Enero', total: 12, resueltas: 8, pendientes: 4, altaPrioridad: 5, mediaPrioridad: 4, bajaPrioridad: 3 },
+  { mes: 'Febrero', total: 18, resueltas: 12, pendientes: 6, altaPrioridad: 7, mediaPrioridad: 6, bajaPrioridad: 5 },
+  { mes: 'Marzo', total: 10, resueltas: 7, pendientes: 3, altaPrioridad: 4, mediaPrioridad: 3, bajaPrioridad: 3 },
+  { mes: 'Abril', total: 15, resueltas: 10, pendientes: 5, altaPrioridad: 6, mediaPrioridad: 5, bajaPrioridad: 4 },
+  { mes: 'Mayo', total: 14, resueltas: 11, pendientes: 3, altaPrioridad: 5, mediaPrioridad: 4, bajaPrioridad: 5 },
+  { mes: 'Junio', total: 16, resueltas: 13, pendientes: 3, altaPrioridad: 6, mediaPrioridad: 5, bajaPrioridad: 5 },
+];
 
 const ReportesIncidencias = () => {
   const [reporte, setReporte] = useState<ReporteIncidencia[]>([]);
@@ -27,24 +39,15 @@ const ReportesIncidencias = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchReporte = async () => {
-      try {
-        const res = await axios.get('/api/soporte/reportes-incidencias');
-        setReporte(res.data);
-      } catch (err) {
-        console.error('Error al obtener reporte:', err);
-        setError('Error al cargar el reporte');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchReporte();
+    setReporte(reporteSimulado);
+    setLoading(false);
   }, []);
 
   const descargarReporte = () => {
-    const csvContent = `data:text/csv;charset=utf-8,Mes,Total Incidencias,Resueltas,Pendientes\n${
-      reporte.map(r => `${r.mes},${r.total},${r.resueltas},${r.pendientes}`).join('\n')
+    const csvContent = `data:text/csv;charset=utf-8,Mes,Total Incidencias,Resueltas,Pendientes,Alta Prioridad,Media Prioridad,Baja Prioridad\n${
+      reporte.map(r =>
+        `${r.mes},${r.total},${r.resueltas},${r.pendientes},${r.altaPrioridad},${r.mediaPrioridad},${r.bajaPrioridad}`
+      ).join('\n')
     }`;
 
     const encodedUri = encodeURI(csvContent);
@@ -77,27 +80,36 @@ const ReportesIncidencias = () => {
         data: reporte.map(r => r.pendientes),
         backgroundColor: '#f59e0b',
       },
+      {
+        label: 'Alta Prioridad',
+        data: reporte.map(r => r.altaPrioridad),
+        backgroundColor: '#dc2626',
+      },
+      {
+        label: 'Media Prioridad',
+        data: reporte.map(r => r.mediaPrioridad),
+        backgroundColor: '#ca8a04',
+      },
+      {
+        label: 'Baja Prioridad',
+        data: reporte.map(r => r.bajaPrioridad),
+        backgroundColor: '#65a30d',
+      },
     ],
   };
 
   const options = {
     responsive: true,
     plugins: {
-      legend: {
-        position: 'top' as const,
-      },
-      title: {
-        display: true,
-        text: 'Reporte Mensual de Incidencias',
-        font: { size: 18 },
-      },
+      legend: { position: 'top' as const },
+      title: { display: true, text: 'Reporte Mensual de Incidencias del Sistema', font: { size: 18 } },
     },
   };
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Reporte de Incidencias</h2>
+        <h2 className="text-2xl font-bold">Reporte de Incidencias del Sistema</h2>
         <button
           onClick={descargarReporte}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
@@ -115,9 +127,12 @@ const ReportesIncidencias = () => {
           <thead className="bg-gray-100">
             <tr>
               <th className="px-4 py-2 text-left">Mes</th>
-              <th className="px-4 py-2 text-left">Total Incidencias</th>
+              <th className="px-4 py-2 text-left">Total</th>
               <th className="px-4 py-2 text-left">Resueltas</th>
               <th className="px-4 py-2 text-left">Pendientes</th>
+              <th className="px-4 py-2 text-left">Alta Prioridad</th>
+              <th className="px-4 py-2 text-left">Media Prioridad</th>
+              <th className="px-4 py-2 text-left">Baja Prioridad</th>
               <th className="px-4 py-2 text-left">Tasa de Resolución</th>
             </tr>
           </thead>
@@ -128,8 +143,11 @@ const ReportesIncidencias = () => {
                 <td className="px-4 py-2">{item.total}</td>
                 <td className="px-4 py-2 text-green-600">{item.resueltas}</td>
                 <td className="px-4 py-2 text-red-600">{item.pendientes}</td>
+                <td className="px-4 py-2 text-red-700 font-semibold">{item.altaPrioridad}</td>
+                <td className="px-4 py-2 text-yellow-700 font-semibold">{item.mediaPrioridad}</td>
+                <td className="px-4 py-2 text-green-700 font-semibold">{item.bajaPrioridad}</td>
                 <td className="px-4 py-2">
-                  {Math.round((item.resueltas / item.total) * 100)}%
+                  {item.total > 0 ? Math.round((item.resueltas / item.total) * 100) : 0}%
                 </td>
               </tr>
             ))}
@@ -139,6 +157,5 @@ const ReportesIncidencias = () => {
     </div>
   );
 };
-
 
 export default ReportesIncidencias;

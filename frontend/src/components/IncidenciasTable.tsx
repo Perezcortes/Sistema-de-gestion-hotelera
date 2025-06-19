@@ -1,6 +1,5 @@
 'use client';
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import Swal from 'sweetalert2';
 
 interface Incidencia {
@@ -13,37 +12,69 @@ interface Incidencia {
   reportadoPor: string;
 }
 
+// Incidencias simuladas sobre problemas del sistema
+const incidenciasSimuladas: Incidencia[] = [
+  {
+    id: 1,
+    titulo: 'Error al iniciar sesión',
+    descripcion: 'El sistema devuelve un error 500 cuando intento iniciar sesión con usuario válido.',
+    fechaReporte: '2025-06-01T08:15:00Z',
+    estado: 'Pendiente',
+    prioridad: 'Alta',
+    reportadoPor: 'Admin',
+  },
+  {
+    id: 2,
+    titulo: 'Interfaz se traba en panel de soporte',
+    descripcion: 'Al cargar la lista de incidencias, la página se queda congelada indefinidamente.',
+    fechaReporte: '2025-06-02T09:00:00Z',
+    estado: 'En Proceso',
+    prioridad: 'Media',
+    reportadoPor: 'Soporte Técnico',
+  },
+  {
+    id: 3,
+    titulo: 'No se actualizan estados de incidencias',
+    descripcion: 'Cambiar estado no refresca la tabla y no refleja el cambio hasta recargar manualmente.',
+    fechaReporte: '2025-06-03T11:30:00Z',
+    estado: 'Pendiente',
+    prioridad: 'Alta',
+    reportadoPor: 'Usuario',
+  },
+  {
+    id: 4,
+    titulo: 'Reporte mensual muestra datos incorrectos',
+    descripcion: 'Los gráficos y tabla del reporte mensual no coinciden con las incidencias registradas.',
+    fechaReporte: '2025-06-04T14:45:00Z',
+    estado: 'Resuelta',
+    prioridad: 'Media',
+    reportadoPor: 'Administrador',
+  },
+  {
+    id: 5,
+    titulo: 'Error al descargar CSV en reporte',
+    descripcion: 'Al descargar el archivo CSV, el contenido está vacío o mal formateado.',
+    fechaReporte: '2025-06-05T10:20:00Z',
+    estado: 'Pendiente',
+    prioridad: 'Alta',
+    reportadoPor: 'Usuario',
+  },
+];
+
 const IncidenciasTable = () => {
   const [incidencias, setIncidencias] = useState<Incidencia[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchIncidencias();
+    setIncidencias(incidenciasSimuladas);
+    setLoading(false);
   }, []);
 
-  const fetchIncidencias = async () => {
-    try {
-      const res = await axios.get('/api/soporte/incidencias');
-      setIncidencias(res.data);
-    } catch (error) {
-      console.error('Error al obtener las incidencias:', error);
-      Swal.fire('Error', 'No se pudieron cargar las incidencias', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const actualizarEstado = async (id: number, nuevoEstado: string) => {
-    try {
-      await axios.put(`/api/soporte/incidencias/${id}/estado`, { estado: nuevoEstado });
-      setIncidencias(prev =>
-        prev.map(inc => inc.id === id ? { ...inc, estado: nuevoEstado as any } : inc)
-      );
-      Swal.fire('Actualizado', 'El estado de la incidencia fue actualizado.', 'success');
-    } catch (error) {
-      console.error('Error al actualizar estado:', error);
-      Swal.fire('Error', 'No se pudo actualizar el estado.', 'error');
-    }
+  const actualizarEstado = (id: number, nuevoEstado: string) => {
+    setIncidencias(prev =>
+      prev.map(inc => inc.id === id ? { ...inc, estado: nuevoEstado as any } : inc)
+    );
+    Swal.fire('Actualizado', 'El estado de la incidencia fue actualizado.', 'success');
   };
 
   const resolverIncidencia = async (id: number) => {
@@ -52,27 +83,20 @@ const IncidenciasTable = () => {
       input: 'textarea',
       inputLabel: 'Describe la solución aplicada',
       inputPlaceholder: 'Escribe aquí la solución...',
-      inputAttributes: {
-        'aria-label': 'Escribe aquí la solución'
-      },
-      showCancelButton: true
+      showCancelButton: true,
     });
 
     if (solucion) {
-      try {
-        await axios.post(`/api/soporte/incidencias/${id}/resolver`, { solucion });
-        Swal.fire('Resuelta', 'La incidencia ha sido marcada como resuelta.', 'success');
-        fetchIncidencias();
-      } catch (error) {
-        console.error('Error al resolver incidencia:', error);
-        Swal.fire('Error', 'No se pudo resolver la incidencia.', 'error');
-      }
+      setIncidencias(prev =>
+        prev.map(inc => inc.id === id ? { ...inc, estado: 'Resuelta' } : inc)
+      );
+      Swal.fire('Resuelta', 'La incidencia ha sido marcada como resuelta.', 'success');
     }
   };
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-2xl font-bold mb-6">Incidencias Reportadas</h2>
+      <h2 className="text-2xl font-bold mb-6">Incidencias del Sistema (Simuladas)</h2>
       {loading ? (
         <p>Cargando incidencias...</p>
       ) : incidencias.length === 0 ? (
@@ -144,6 +168,5 @@ const IncidenciasTable = () => {
     </div>
   );
 };
-
 
 export default IncidenciasTable;
