@@ -100,12 +100,17 @@ const ModalPerfil: React.FC<ModalPerfilProps> = ({ isOpen, onClose }) => {
         window.location.reload();
       }, 1000);
     } catch (error: any) {
-      showErrorToast(
-        error.response?.data?.mensaje || error.message || "Error al actualizar perfil"
-      );
+      const backendMessage = error.response?.data?.message || "";
+
+      if (backendMessage.includes("correo") || backendMessage.includes("email") || backendMessage.includes("usuario")) {
+        showErrorToast("Ya existe una cuenta con ese correo o nombre de usuario. Por favor usa otros.");
+      } else {
+        showErrorToast(backendMessage || error.message || "Error al actualizar perfil");
+      }
     } finally {
       setLoading(false);
     }
+
   };
 
   const handleClose = () => {

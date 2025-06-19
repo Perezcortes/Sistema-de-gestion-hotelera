@@ -31,6 +31,7 @@ const servicios = [
 const PropuestaTarifa = () => {
   const [tipoHabitacion, setTipoHabitacion] = useState('');
   const [precio, setPrecio] = useState('');
+  const [justificacion, setJustificacion] = useState('');
   const [mensaje, setMensaje] = useState('');
   const [error, setError] = useState('');
   const [enviando, setEnviando] = useState(false);
@@ -40,7 +41,7 @@ const PropuestaTarifa = () => {
     setMensaje('');
     setError('');
 
-    if (!tipoHabitacion.trim() || !precio.trim()) {
+    if (!tipoHabitacion.trim() || !precio.trim() || !justificacion.trim()) {
       setError('Todos los campos son obligatorios');
       return;
     }
@@ -52,10 +53,11 @@ const PropuestaTarifa = () => {
 
     try {
       setEnviando(true);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulación
       setMensaje('✅ Propuesta de tarifa enviada correctamente');
       setTipoHabitacion('');
       setPrecio('');
+      setJustificacion('');
     } catch {
       setError('❌ Error al enviar la propuesta');
     } finally {
@@ -68,7 +70,6 @@ const PropuestaTarifa = () => {
       {/* Lista de Tarifas */}
       <div>
         <h2 className="text-3xl font-bold mb-4">Tarifas Actuales</h2>
-
         <div className="space-y-6">
           <div>
             <h3 className="text-xl font-semibold mb-2">Habitaciones</h3>
@@ -115,6 +116,14 @@ const PropuestaTarifa = () => {
             placeholder="Precio propuesto"
             value={precio}
             onChange={(e) => setPrecio(e.target.value)}
+            disabled={enviando}
+          />
+          <textarea
+            className="w-full p-3 border border-gray-300 rounded mb-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-600"
+            placeholder="Justificación de la propuesta"
+            rows={4}
+            value={justificacion}
+            onChange={(e) => setJustificacion(e.target.value)}
             disabled={enviando}
           />
           {error && <p className="text-red-600 mb-2">{error}</p>}
