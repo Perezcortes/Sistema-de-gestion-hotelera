@@ -15,8 +15,6 @@ export default function Tareas() {
     const [activeReminderTareaId, setActiveReminderTareaId] = useState<number | null>(null); 
     const [nuevaTareaAccion, setNuevaTareaAccion] = useState<string>('');
 
-    // console.log('Tareas.tsx se está renderizando');
-
     const defaultTareas: Tarea[] = [
         { id: -1, accion: 'Limpiar Baños', time: new Date().toISOString() },
         { id: -2, accion: 'Rellenar jabón de manos', time: new Date().toISOString() },
@@ -81,13 +79,10 @@ export default function Tareas() {
                 const elapsedM = elapsedMs / (1000 * 60);
                 //aqui damos por prioridad
                 if (elapsedM > 2) { 
-                    currentReminder = `¡URGENTE! La tarea "${tarea.accion}" lleva bastante más de 2 minutos.`;
+                    currentReminder = `¡URGENTE! La tarea "${tarea.accion}" lleva bastante más de 2 horas.`;
                     currentReminderTareaId = tarea.id;
                     break; 
-                } else if (elapsedM > 1) {
-                    currentReminder = `¡Recordatorio! La tarea "${tarea.accion}" lleva más de 1 minutos.`;
-                    currentReminderTareaId = tarea.id;
-               }
+                } 
             } catch (e) {
                 console.error("Frontend: Error al procesar la hora de la tarea:", tarea.time, e);
             }
