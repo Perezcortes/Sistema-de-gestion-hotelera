@@ -13,5 +13,7 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+export const getTickets = () => api.get('/soporte');
+export const createTicket = (data: any) => api.post('/soporte', data);
 
 export default api;

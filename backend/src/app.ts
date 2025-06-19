@@ -7,7 +7,9 @@ import adminRoutes from './routes/admin.routes';
 import solicitudRoutes from './routes/Solicitud.route';
 import tareaRoutes from './routes/tarea.routes'; 
 import habitacionRoutes from './routes/habitacion.routes';
-
+import incidenciaRoutes from './routes/incidencia.routes';
+import reporteRoutes from './routes/reporte.routes';
+import autorizacionRoutes from './routes/autorizacion.routes';
 const app = express();
 
 // Middlewares
@@ -36,5 +38,10 @@ app.use('/api/admin', adminRoutes);
 app.use('/api', solicitudRoutes);
 app.use('/api', tareaRoutes);
 app.use('/api', habitacionRoutes);
+
+//ruta soporte
+app.use('/api/incidencia', incidenciaRoutes);
+app.use('/api/reporte', reporteRoutes);
+app.use('/api/autorizacion', autorizacionRoutes);
 
 export default app;
