@@ -1,19 +1,30 @@
-import React from 'react';
-import { useAuth } from '../context/AuthContext';
+//src/pages/soporte/dashboard.tsx
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import IncidenciaCard from '../components/IncidenciaCard';
 
-const SoporteDashboardPage = () => {
-  const { user } = useAuth();
+export default function SoporteDashboardPage() {
+  const [incidencias, setIncidencias] = useState<any[]>([]);
 
-  if (!user || user.id_rol !== 3) {
-    return <div>No autorizado</div>;
-  }
+  const cargar = async () => {
+    const res = await axios.get('/api/incidencia');
+    setIncidencias(res.data);
+  };
+
+  useEffect(() => { cargar(); }, []);
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-4">Panel de Soporte Técnico</h1>
-      <p>Hola {user.nombre}, pronto podrás revisar y dar seguimiento a incidencias técnicas desde aquí.</p>
+      <h1 className="text-2xl font-bold mb-4">Panel de Soporte Técnico</h1>
+      {incidencias.length === 0 ? (
+        <p>No hay incidencias registradas.</p>
+      ) : (
+        <div className="grid gap-4">
+          {incidencias.map((inc) => (
+            <IncidenciaCard key={inc.id} incidencia={inc} onReload={cargar} />
+          ))}
+        </div>
+      )}
     </div>
   );
-};
-
-export default SoporteDashboardPage;
+}
