@@ -13,6 +13,7 @@ export default function ActualizarHabitacion() {
     const [loading, setLoading] = useState<boolean>(true);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [searchTerm, setSearchTerm] = useState<string>('');
 
     //Obtener Habitacion
     const fetchHabitaciones = useCallback(async () => {
@@ -59,6 +60,10 @@ export default function ActualizarHabitacion() {
         }
     };
 
+    const filteredHabitaciones = habitaciones.filter(habitacion =>
+        habitacion.num_habitacion.toString().includes(searchTerm.toLowerCase())
+    );
+
     // Cargar habitaciones al montar el componente
     useEffect(() => {
         fetchHabitaciones();
@@ -82,8 +87,21 @@ export default function ActualizarHabitacion() {
                 </div>
             )}
 
-            {loading && <div className="text-center p-4">Cargando habitaciones...</div>}
+            <div className="mb-4">
+                <input
+                    type="text"
+                    placeholder="Buscar habitación por número..."
+                    className="p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-cyan-600"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </div>
 
+            {loading && <div className="text-center p-4">Cargando habitaciones...</div>}
+            
+            {!loading && filteredHabitaciones.length === 0 && ( // Muestra este mensaje si no hay habitaciones después de filtrar
+                <div className="text-center p-4 text-gray-700">No hay habitaciones que coincidan con tu búsqueda.</div>
+            )}
             {!loading && habitaciones.length === 0 && (
                 <div className="text-center p-4 text-gray-700">No hay habitaciones registradas.</div>
             )}
@@ -99,7 +117,7 @@ export default function ActualizarHabitacion() {
                         </tr>
                     </thead>
                     <tbody>
-                        {habitaciones.map((habitacion) => (
+                        {filteredHabitaciones.map((habitacion) => ( // Renderiza habitaciones filtradas
                             <tr key={habitacion.id} className="border-b border-gray-200 hover:bg-gray-50">
                                 <td className="py-2 px-4 text-slate-800">{habitacion.num_habitacion}</td>
                                 <td className="py-2 px-4 text-slate-700">{habitacion.descripcion}</td>
@@ -118,21 +136,21 @@ export default function ActualizarHabitacion() {
                                         <button
                                             onClick={() => handleChangeEstado(habitacion.id, 'En Limpieza', habitacion.estado)}
                                             className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1 px-3 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                                            disabled={habitacion.estado === 'En Limpieza'} // Deshabilita si ya está en este estado
+                                            disabled={habitacion.estado === 'En Limpieza'}
                                         >
                                             En Limpieza
                                         </button>
                                         <button
                                             onClick={() => handleChangeEstado(habitacion.id, 'En Mantenimiento', habitacion.estado)}
                                             className="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                                            disabled={habitacion.estado === 'En Mantenimiento'} // Deshabilita si ya está en este estado
+                                            disabled={habitacion.estado === 'En Mantenimiento'}
                                         >
                                             En Mantenimiento
                                         </button>
                                         <button
                                             onClick={() => handleChangeEstado(habitacion.id, 'Disponible', habitacion.estado)}
                                             className="bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-3 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                                            disabled={habitacion.estado === 'Disponible'} // Deshabilita si ya está en este estado
+                                            disabled={habitacion.estado === 'Disponible'}
                                         >
                                             Disponible
                                         </button>
